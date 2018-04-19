@@ -1,11 +1,10 @@
 Package: dataLiteracy
 Type: Package
-Title: What the Package Does (Title Case)
+Title: LearnR package for teaching basics of graph and data literacy
 Version: 0.1.0
-Author: Who wrote it
-Maintainer: The package maintainer <yourself@somewhere.net>
-Description: More about what it does (maybe more than one line)
-    Use four spaces when indenting paragraphs within the Description.
+Author: Ted Laderas
+Maintainer: Ted Laderas <tedladeras@gmail.com>
+Description: LearnR package for teaching graph and data literacy. 
 License: What license is it under?
 Encoding: UTF-8
 LazyData: true
@@ -13,3 +12,5 @@ Imports:
     learnr,
     tidyverse,
     shiny
+URL: https://github.com/laderast/dataLiteracy
+BugReports: https://github.com/laderast/dataLiteracy/issues
