@@ -1,0 +1,309 @@
+---
+title: "Data Literacy: Understanding Visualizations"
+author: "Ted Laderas"
+date: "`r Sys.Date()`"
+output: learnr::tutorial
+#output: html_document
+runtime: shiny_prerendered
+#runtime: shiny
+---
+
+```{r setup, include=FALSE}
+options(htmltools.dir.version = FALSE)
+library(here)
+library(tidyverse)
+library(learnr)
+library(ggbeeswarm)
+theme_set(theme_classic())
+theme_update(text=element_text(size = 20)) 
+```
+
+
+## Learning Objectives
+
++ Understand how we can represent different kinds of data
++ Understand how to communicate with visualizations
++ Understand when visualizations are misleading
+
+Graph literacy
+https://concord.org/wp-content/uploads/2016/12/pdf/teaching-graph-literacy-across-curriculum.pdf
+
+### Why EDA and Visualization?
+
+Visualization is good for exploring data because we are really good at evaluating things visually.
+
++ We need to become aware of patterns in the data.
++ Sometimes these patterns are desirable:
+    + Associations
+
+![Broad Street Pump Map](images/broadblock_original.jpg)
+http://www.ph.ucla.edu/epi/snow/mapsbroadstreet.html
+
+### Undesirable Variation
+
++ Sometimes they are not desirable:
+    + Experimental Artefacts
+
+![Systolic Blood Pressure Reporting](images/F1.large.jpg)
+http://care.diabetesjournals.org/content/30/8/1959
+
+--- 
+
+### Types of useful graphs
+
+- scales and axes
+- time-series
+- single dimension data
+    - histograms
+    - barplots
+- two way data (relationships)
+    - scatterplots
+    - filled bar plots
+    - proportional plots
+- representing more dimensions
+    - aesthetics
+
+---
+
+### Outline
+
++ Base Visualizations
++ Aesthetics
++ Activity
+
+![http://extremepresentation.typepad.com/blog/2006/09/choosing_a_good.html](images/choosing_a_good_chart.jpg)
+
+---
+
+### The bare minimum you need from a graph
+
++ Title (what it represents)
++ Labeled Axes
+    + Each aesthetic should have a scale
++ How many variables and their types
++ Scales
++ Mapping the data to a visual property
+
+- Title (most plots should have this)
+- Axis labels (almost all plots should have this)
+- How many variables and their types
+    - Including ones used to dictate colors, shapes, patterns, sizes, opacities, etc.
+    - Independent ("*predictor*") variables (e.g. time) are usually on the X (horizontal) axis
+        - Occasionally time is plotted on the vertical axis for specific reasons
+    - Dependent ("*outcome*" / "*response*") variables are usually on the Y (vertical) axis
+- Scales (especially log-transformed ones)
+
+---
+
+## Categorical Data
+
+### Bar Graphs
+
+
+## Continuous Data
+
+### Histogram: Play with the Bins
+
+Try adjusting the number of bins for the histogram. 
+
+```{r echo=FALSE}
+sliderInput("hist_slider", "Number of Bins", min = 2, max=40, value = 15)
+plotOutput("hist_plot")
+```
+
+```{r context="server"}
+load(here("data", "bmi_diabetes.rda"))
+
+bmi_diabetes_small <- bmi_diabetes %>% dplyr::sample_n(size=200)
+
+output$hist_plot <- renderPlot(
+bmi_diabetes_small %>% ggplot(aes(x=BMI)) + geom_histogram(bins = input$hist_slider, fill="white", color="black")
+)
+```
+
+What details gets lost as you adjust the number of bins?
+
+### Histogram: Play with the Scale
+
+Try adjusting the number of bins for the histogram. 
+
+```{r echo=FALSE}
+selectInput("hist2_scale", label = "Select type of scale",choices = c("linear", "log"), selected="linear")
+plotOutput("hist2_plot")
+```
+
+```{r context="server"}
+load(here("data", "bmi_diabetes.rda"))
+
+bmi_diabetes_small <- bmi_diabetes %>% dplyr::sample_n(size=200)
+
+output$hist2_plot <- renderPlot({
+outPlot <- bmi_diabetes_small %>% ggplot(aes(x=BMI)) + geom_histogram(bins = input$hist_slider, fill="white", color="black")
+
+if(input$hist2_scale == "log"){
+  outPlot <- outPlot + scale_x_log10()
+}
+
+outPlot
+})
+```
+
+### All the different ways to represent a continuous variable
+
+Try out all the different ways you can represent a continuous variable in a distribution. Which one do you like?
+
+```{r echo=FALSE}
+selectInput("hist3_scale", label = "Select type of scale",choices = c("histogram", "density","boxplot", "violin", "dotplot"), selected="histogram")
+plotOutput("cont1_plot")
+```
+
+
+```{r context="server"}
+#load(here("data", "bmi_diabetes.rda"))
+
+bmi_diabetes_small <- bmi_diabetes %>% dplyr::sample_n(size=200)
+
+output$cont1_plot <- renderPlot({
+outPlot <- bmi_diabetes_small %>% ggplot(aes(x=BMI)) 
+
+
+  if(input$hist3_scale =="histogram"){
+    outPlot <- outPlot + geom_histogram(bins = input$hist_slider, 
+                                      fill="white", color="black")}
+  if(input$hist3_scale == "density"){
+    outPlot <- outPlot + geom_density()
+  }
+
+  if(input$hist3_scale == "boxplot"){
+    outPlot <- outPlot + geom_boxplot(aes(y=BMI)) + coord_flip()
+  }
+
+  if(input$hist3_scale == "violin"){
+    outPlot <- outPlot + geom_violin(aes(y=BMI)) + coord_flip()
+  }
+
+  if(input$hist3_scale == "dotplot"){
+    outPlot <- outPlot + geom_dotplot()
+  }
+
+  outPlot
+})
+```
+---
+
+### Quiz Yourself: Distributions of annual income
+
+Take a look at the distributions of annual income graph here and compare 1960 to 2016.
+
+https://flowingdata.com/2016/06/28/distributions-of-annual-income/
+
+```{r distributions}
+question("What is the major difference between the 1960 and 2016 annual income distributions?",
+  answer("[The gap between those who make 200K and more compared to the less is larger for the different professions.]", correct=TRUE, message="Correct. There are 4 patients who are alive and not smokers."),
+  answer("There are 5 patients.", message="Not quite. Go back and count."),
+  allow_retry = TRUE
+)
+```
+
+## Relationships: 2 categorical variables
+
+### Association
+
+```{r echo = FALSE}
+load(here("data", "bmi_diabetes.rda"))
+
+bmi_diabetes_small <- bmi_diabetes %>% dplyr::sample_n(size=200)
+
+bmi_diabetes_small %>% select(BMIstatus, Diabetes) %>% table()
+```
+
+### Proportional versus Frequency
+
+Change the barplot type from `regular` to `proportional`. What changes? (look at the scale before/after).
+
+Which barplot type helps you answer the question:
+
+```{r echo = FALSE}
+selectInput("bar_control1", "Select type of Barplot", choices=c("proportional", "regular"), selected="regular")
+plotOutput("bar_1")
+```
+
+```{r context="server"}
+output$bar_1 <- renderPlot({
+  
+  outPlot <- bmi_diabetes_small %>% filter(!is.na(BMIstatus)) %>% ggplot(aes(x=BMIstatus, fill=Diabetes))
+  
+  if(input$bar_control1 == "regular"){
+    outPlot <- outPlot + geom_bar(position="stack", color="black")
+  }
+  
+  if(input$bar_control1 == "proportional"){
+    outPlot <- outPlot + geom_bar(position="fill", color="black")
+  }
+  
+  outPlot
+})
+
+```
+
+## Relationships: 1 categorical, 1 continuous
+
+When we are looking for relationships 
+
+### Boxplots
+
+```{r echo=FALSE}
+selectInput("boxplot1_selection", "Select Categorical Variable", choices = c("Diabetes", "Gender", "BMIstatus"), selected ="Diabetes")
+plotOutput("boxplot1")
+```
+
+```{r context="server"}
+output$boxplot1 <- renderPlot({
+  bmi_diabetes_small %>% ggplot(aes_string(x=input$boxplot1_selection, y="BMI", fill=input$boxplot1_selection)) +
+    geom_boxplot()
+  
+})
+```
+
+
+```{r echo=FALSE}
+
+```
+
+## Relationships: 2 continuous variables
+
+## Relationships: 1 variable versus time
+
+### Time Series
+
+Time series data is everywhere. 
+
+We are often interested in looking at overall trends, or differences in trends.
+
+Many types of clinical data can be represented as time series:
+
+- Lab Information
+- Patient Visits
+- Nursing Shifts
+
+### Playing with time scales
+
+Try modifying the beginning and end points for the data. Can you make it look like there is an overall downward trend? 
+
+
+---
+
+### Visualization Lies
+
+https://flowingdata.com/2017/02/09/how-to-spot-visualization-lies/
+http://serialmentor.com/dataviz/
+
+---
+
+https://chronicdata.cdc.gov/Behavioral-Risk-Factors/Behavioral-Risk-Factor-Surveillance-System-BRFSS-P/dttw-5yxu
+
+### Partially adapted from:
+
+https://github.com/bearloga/wmf-allhands18
+https://github.com/laderast/dsiexplore
+
