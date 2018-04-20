@@ -15,6 +15,7 @@ library(tidyverse)
 library(learnr)
 library(cowplot)
 library(fivethirtyeight)
+library(dataLiteracyTutorial)
 theme_set(theme_classic())
 theme_update(text=element_text(size = 20)) 
 data("bmi_diabetes",package = "dataLiteracyTutorial")
@@ -80,7 +81,7 @@ We're going to look at data from a study called NHANES (National Health and Nutr
 
 ### What does the data actually look like?
 
-Here are the first 10 rows of the data table. Each row of the data corresponds to a patient.
+Here are the first 10 rows of the data table. Each row of the data corresponds to a patient. 
 
 ```{r echo=FALSE}
 bmi_diabetes[1:10,]
@@ -161,7 +162,7 @@ bmi_diabetes_small %>% ggplot(aes(x=BMI)) +
 
 To make a histogram, we have to bin the data. or convert the continuous data into ranges. 
 
-Try adjusting the number of bins for the histogram. What details gets lost as you adjust the number of bins?
+Try adjusting the number of bins for the histogram. What details gets lost as you adjust the number of bins downwards?
 
 ```{r echo=FALSE}
 sliderInput("hist_slider", "Number of Bins", min = 2, max=40, value = 15)
@@ -181,7 +182,6 @@ output$hist_plot <- renderPlot(
 )
 ```
 
-
 ### Histogram: Play with the Scale
 
 Try adjusting the scale for the histogram. What happens to the shape of the distribution?
@@ -192,13 +192,12 @@ plotOutput("hist2_plot")
 ```
 
 ```{r context="server"}
-
 output$hist2_plot <- renderPlot({
   outPlot <- bmi_diabetes_small %>% ggplot(aes(x=BMI)) + 
-    geom_histogram(bins = input$hist_slider, fill="white", color="black")
+    geom_histogram(bins = 15, fill="white", color="black")
 
   if(input$hist2_scale == "log"){
-    outPlot <- outPlot + scale_x_log10()
+    outPlot <- outPlot + scale_x_log10(position="bottom")
   }
 
   outPlot
@@ -220,9 +219,10 @@ plotOutput("cont1_plot")
 output$cont1_plot <- renderPlot({
 outPlot <- bmi_diabetes_small %>% ggplot(aes(x=BMI)) 
 
+bins <- 30
 
   if(input$hist3_scale =="histogram"){
-    outPlot <- outPlot + geom_histogram(bins = input$hist_slider, 
+    outPlot <- outPlot + geom_histogram(bins = bins, 
                                       fill="white", color="black")}
   if(input$hist3_scale == "density"){
     outPlot <- outPlot + geom_density()
@@ -237,13 +237,20 @@ outPlot <- bmi_diabetes_small %>% ggplot(aes(x=BMI))
   }
 
   if(input$hist3_scale == "dotplot"){
-    outPlot <- outPlot + geom_dotplot()
+    outPlot <- outPlot + geom_dotplot(bins=bins)
   }
 
   outPlot
 })
 ```
----
+
+### Something weird about age
+
+Let's look at our other continuous covariate, `Age`. Does the dotplot show anything weird to you?
+
+```{r}
+bmi_diabetes_small %>% ggplot(aes(x=Age)) + geom_dotplot() + xlim(c(21, 90)) 
+```
 
 ### Quiz Yourself: Distributions of annual income
 
@@ -267,7 +274,7 @@ Now we're going to delve into ways of visualizing the relationships between two 
 
 ```{r echo = FALSE}
 load(here("data", "bmi_diabetes.rda"))
-set.seed(1)
+set.seed(3)
 bmi_diabetes_small <- bmi_diabetes %>% dplyr::sample_n(size=200)
 
 bmi_diabetes_small %>% select(BMIstatus, Diabetes) %>% table()
@@ -325,11 +332,11 @@ question("Is there a large difference in proportions of those who have Diabetes 
 
 We can try to see if multiple categories line up, but one of the issues is tracking size changes.
 
-[The Bechdel Test] is a test to determine whether women are represented fairly in movies. 
+[The Bechdel Test](http://bechdeltest.com) is a test to determine whether women are represented fairly in movies. 
 
 Look at the graph below. What does the black line in the middle of the graph represent? Are there more movies now that pass the test than fail them?
 
-What about the subcategories? Is it easy or hard to see if they are changing with time?
+What about the subcategories, such as `Women only talk about men`? Is it easy or hard to see if they are changing with time?
 
 ![Bechdel Test and Movies](images/hickey-bechdel-11.png)
 
@@ -344,7 +351,6 @@ Make sure you understand the following terms before you go on. [Here's a quick r
 - *percentile* 
 - *median*
 - *mean* 
-- *mode* 
 
 ### Boxplots
 
@@ -354,7 +360,7 @@ A [boxplot](https://en.wikipedia.org/wiki/Box_plot) allows you to visually compa
 
 - Sample minimum (the smallest value)
 - First [quartile](https://en.wikipedia.org/wiki/Quartile) (*Q<sub>1</sub>*) which is the 25th percentile
-- Second quartile (*Q<sub>2</sub>*) also known as the [*median*](https://en.wikipedia.org/wiki/Median)
+- Second quartile (*Q<sub>2</sub>*) also known as the [*median*](https://en.wikipedia.org/wiki/Median). By definition, this is the middle of the data - 50% of the data is above this value and 50% is below this value.
 - Third quartile (*Q<sub>3</sub>*) which is the 75th percentile
 - Sample maximum (the largest value)
 
@@ -388,7 +394,7 @@ ggplot(data = iris, aes(y = Sepal.Length, x = 1)) +
     axis.text.x = element_blank()
   )
 ```
-[Example Modified from Mikhail Popov](https://github.com/bearloga/wmf-allhands18)
+[Example and definition modified from Mikhail Popov](https://github.com/bearloga/wmf-allhands18)
 
 ### Understanding Boxplots
 
@@ -403,7 +409,6 @@ plotOutput("boxplot1")
 output$boxplot1 <- renderPlot({
   bmi_diabetes_small %>% ggplot(aes_string(x=input$boxplot1_selection, y="BMI", fill=input$boxplot1_selection)) +
     geom_boxplot()
-  
 })
 ```
 
@@ -425,13 +430,13 @@ plotOutput("box_v_violin")
 
 ```{r context="server"}
 output$box_v_violin <- renderPlot({
-boxp <- bmi_diabetes_small %>% ggplot(aes(x=Diabetes, y=BMI, fill=Diabetes)) +
-  geom_boxplot()
+  boxp <- bmi_diabetes_small %>% ggplot(aes(x=Diabetes, y=BMI, fill=Diabetes)) +
+    geom_boxplot()
 
-viop <- bmi_diabetes_small %>% ggplot(aes(x=Diabetes, y=BMI, fill=Diabetes)) +
-  geom_violin()
+  viop <- bmi_diabetes_small %>% ggplot(aes(x=Diabetes, y=BMI, fill=Diabetes)) +
+    geom_violin()
 
-cowplot::plot_grid(boxp, viop)
+  cowplot::plot_grid(boxp, viop)
 })
 ```
 
@@ -440,9 +445,14 @@ cowplot::plot_grid(boxp, viop)
 
 ### Scatterplots
 
+Scatterplots show the relationship between two continuous variables.
 
+```{r echo=FALSE}
+bmi_diabetes_small %>% ggplot(aes(x=Age, y=BMI)) + geom_point()
+```
 
 ### Playing with Ranges and Scales
+
 
 
 ### Trend Lines
@@ -470,7 +480,7 @@ Many types of clinical data can be represented as time series:
 Try modifying the beginning and end points for the data. Can you make it look like there is an overall downward trend? 
 
 ```{r}
-
+bmi_diabetes_small %>% ggplot(aes(x=Age, y=BMI)) + geom_point()
 ```
 ---
 

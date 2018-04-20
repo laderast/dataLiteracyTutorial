@@ -14,6 +14,7 @@ Imports:
     shiny,
     here,
     cowplot,
-    fivethirtyeight
+    fivethirtyeight,
+    plotly
 URL: https://github.com/laderast/dataLiteracy
 BugReports: https://github.com/laderast/dataLiteracy/issues
