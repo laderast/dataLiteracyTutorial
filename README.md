@@ -20,7 +20,7 @@ devtools::install_github("laderast/dataLiteracyTutorial")
 You can then run the tutorial with
 
 ``` r
-learnr::run_tutorial("dataLiteracy", package = "dataLiteracyTutorial")
+learnr::run_tutorial("dataLiteracyTutorial", package = "dataLiteracyTutorial")
 ```
 
 Acknowledgements

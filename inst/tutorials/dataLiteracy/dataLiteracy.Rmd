@@ -17,8 +17,8 @@ library(cowplot)
 library(fivethirtyeight)
 theme_set(theme_classic())
 theme_update(text=element_text(size = 20)) 
+data("bmi_diabetes",package = "dataLiteracyTutorial")
 ```
-
 
 ## Learning Objectives
 
@@ -31,7 +31,7 @@ https://concord.org/wp-content/uploads/2016/12/pdf/teaching-graph-literacy-acros
 
 ### Why Visualization?
 
-Visualization is good for exploring data because we are really good at evaluating things visually.
+Visualization is good for exploring data because we are really good at evaluating data visually.
 
 + We need to become aware of patterns in the data.
 + Sometimes these patterns are desirable:
@@ -74,19 +74,75 @@ http://care.diabetesjournals.org/content/30/8/1959
     - Dependent ("*outcome*" / "*response*") variables are usually on the Y (vertical) axis
 - Scales (especially log-transformed ones)
 
-### Aesthetics: How do we represent a data point?
+## The Data (NHANES)
 
+We're going to look at data from a study called NHANES (National Health and Nutrition Survey). 
+
+### What does the data actually look like?
+
+Here are the first 10 rows of the data table. Each row of the data corresponds to a patient.
+
+```{r echo=FALSE}
+bmi_diabetes[1:10,]
+```
+
+```{r datatable, echo=FALSE}
+question("How many patients have Diabetes (Diabetes = `yes`) and are Male (Gender = `Male`) from these first 10 rows?",
+  answer("There are 3 patients.", correct=TRUE, message="Correct. There are 3 patients who have diabetes and are male."),
+  answer("There are 4 patients.", message="Not quite. Go back and count."),
+  answer("There are 5 patients.", message="Not quite. Go back and count.."),
+  allow_retry = TRUE
+)
+```
+
+### Summary Data
+
+Let's take a look at a summary of the data. 
+
+```{r message=FALSE, warning=FALSE, echo=TRUE}
+library(tidyverse)
+
+summary(bmi_diabetes)
+```
+
+```{r summary, echo=FALSE}
+question("What can we learn from this summary table?",
+  answer("The smallest BMI value is 15.", correct=TRUE, message="Correct!"),
+  answer("There are two variables", message="Not quite. There's `outcome`, `smoker`, and `age`."),
+  answer("You are considered as having diabetes versus not having diabetes", correct=TRUE, message="Yes, that's correct!"),
+  answer("The age range of the patients includes minors.", message="Incorrect. Look at the min value for age."),
+  answer("The average age of the participant was around 47 years of age", correct="Yes, the mean age was 46.92 years of age. Yes, you can see it as the mean value for the age" ),
+  allow_retry = TRUE
+)
+```
 
 ## Categorical Data
 
 ### Bar Graphs
 
+### Let's look at Diabetes in our patients
+
+One tool we often use to explore the data is a `table`, which counts how much of each category is there. Which group is larger?
+
+```{r echo = TRUE}
+table(bmi_diabetes$Diabetes)
+```
+
+Here's another way to look at the data, a bar plot. You can instantly see which of the groups is larger.
+
+```{r echo=TRUE}
+bmi_diabetes %>% ggplot(aes(x=Diabetes)) + geom_bar() + ggtitle("Summary of Patients: Diabetes")
+```
+
+Sometimes it is easier to look at a table, but usually a bar chart will make things more obvious.
 
 ## Continuous Data
 
-## Histograms
+### Histograms
 
 A [histogram](https://en.wikipedia.org/wiki/Histogram) shows the distribution of a continuous variable by splitting it into bins and counting how many observations fall into each bin (left). 
+
+You can think of a histogram as a bar graph where the x variable is numeric. 
 
 ```{r}
 set.seed(3)
@@ -128,7 +184,7 @@ output$hist_plot <- renderPlot(
 
 ### Histogram: Play with the Scale
 
-Try adjusting the scale for the histogram. 
+Try adjusting the scale for the histogram. What happens to the shape of the distribution?
 
 ```{r echo=FALSE}
 selectInput("hist2_scale", label = "Select type of scale",choices = c("linear", "log"), selected="linear")
@@ -380,7 +436,6 @@ cowplot::plot_grid(boxp, viop)
 ```
 
 
-
 ## Relationships: 2 continuous variables
 
 ### Scatterplots
@@ -390,7 +445,7 @@ cowplot::plot_grid(boxp, viop)
 ### Playing with Ranges and Scales
 
 
-### Fit Lines
+### Trend Lines
 
 
 

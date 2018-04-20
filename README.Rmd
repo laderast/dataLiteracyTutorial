@@ -30,9 +30,11 @@ devtools::install_github("laderast/dataLiteracyTutorial")
 You can then run the tutorial with
 
 ```r
-learnr::run_tutorial("dataLiteracy", package = "dataLiteracyTutorial")
+learnr::run_tutorial("dataLiteracyTutorial", package = "dataLiteracyTutorial")
 ```
 
 ## Acknowledgements
 
 Portions of this tutorial were adapted from Mikhail Popov's excellent data literacy workshop from Wikipedia: https://github.com/bearloga/wmf-allhands18 and a previous LearnR tutorial called `DSIexplore` that Jessica Minnier and I did: https://github.com/laderast/dsiexplore 
+
+
