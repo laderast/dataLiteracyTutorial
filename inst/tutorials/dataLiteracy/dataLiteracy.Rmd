@@ -13,7 +13,8 @@ options(htmltools.dir.version = FALSE)
 library(here)
 library(tidyverse)
 library(learnr)
-library(ggbeeswarm)
+library(cowplot)
+library(fivethirtyeight)
 theme_set(theme_classic())
 theme_update(text=element_text(size = 20)) 
 ```
@@ -28,7 +29,7 @@ theme_update(text=element_text(size = 20))
 Graph literacy
 https://concord.org/wp-content/uploads/2016/12/pdf/teaching-graph-literacy-across-curriculum.pdf
 
-### Why EDA and Visualization?
+### Why Visualization?
 
 Visualization is good for exploring data because we are really good at evaluating things visually.
 
@@ -47,24 +48,6 @@ http://www.ph.ucla.edu/epi/snow/mapsbroadstreet.html
 ![Systolic Blood Pressure Reporting](images/F1.large.jpg)
 http://care.diabetesjournals.org/content/30/8/1959
 
---- 
-
-### Types of useful graphs
-
-- scales and axes
-- time-series
-- single dimension data
-    - histograms
-    - barplots
-- two way data (relationships)
-    - scatterplots
-    - filled bar plots
-    - proportional plots
-- representing more dimensions
-    - aesthetics
-
----
-
 ### Outline
 
 + Base Visualizations
@@ -73,13 +56,11 @@ http://care.diabetesjournals.org/content/30/8/1959
 
 ![http://extremepresentation.typepad.com/blog/2006/09/choosing_a_good.html](images/choosing_a_good_chart.jpg)
 
----
-
-### The bare minimum you need from a graph
+### What a graph needs
 
 + Title (what it represents)
 + Labeled Axes
-    + Each aesthetic should have a scale
+    + Each aesthetic should have a scale/legend
 + How many variables and their types
 + Scales
 + Mapping the data to a visual property
@@ -93,7 +74,8 @@ http://care.diabetesjournals.org/content/30/8/1959
     - Dependent ("*outcome*" / "*response*") variables are usually on the Y (vertical) axis
 - Scales (especially log-transformed ones)
 
----
+### Aesthetics: How do we represent a data point?
+
 
 ## Categorical Data
 
@@ -102,9 +84,28 @@ http://care.diabetesjournals.org/content/30/8/1959
 
 ## Continuous Data
 
+## Histograms
+
+A [histogram](https://en.wikipedia.org/wiki/Histogram) shows the distribution of a continuous variable by splitting it into bins and counting how many observations fall into each bin (left). 
+
+```{r}
+set.seed(3)
+load(here("data", "bmi_diabetes.rda"))
+
+bmi_diabetes_small <- bmi_diabetes %>% dplyr::sample_n(size=200)
+
+bmi_diabetes_small %>% ggplot(aes(x=BMI)) + 
+  geom_histogram(bins = 10, fill="white", color="black") + 
+  ggtitle("Histogram of Patients of\nNHANES with BMI Values")
+```
+
+[Definition edited from Mikhail Popov](https://github.com/bearloga/wmf-allhands18)
+
 ### Histogram: Play with the Bins
 
-Try adjusting the number of bins for the histogram. 
+To make a histogram, we have to bin the data. or convert the continuous data into ranges. 
+
+Try adjusting the number of bins for the histogram. What details gets lost as you adjust the number of bins?
 
 ```{r echo=FALSE}
 sliderInput("hist_slider", "Number of Bins", min = 2, max=40, value = 15)
@@ -113,19 +114,21 @@ plotOutput("hist_plot")
 
 ```{r context="server"}
 load(here("data", "bmi_diabetes.rda"))
+set.seed(3)
 
 bmi_diabetes_small <- bmi_diabetes %>% dplyr::sample_n(size=200)
 
 output$hist_plot <- renderPlot(
-bmi_diabetes_small %>% ggplot(aes(x=BMI)) + geom_histogram(bins = input$hist_slider, fill="white", color="black")
+  bmi_diabetes_small %>% ggplot(aes(x=BMI)) + 
+    geom_histogram(bins = input$hist_slider, 
+                   fill="white", color="black")
 )
 ```
 
-What details gets lost as you adjust the number of bins?
 
 ### Histogram: Play with the Scale
 
-Try adjusting the number of bins for the histogram. 
+Try adjusting the scale for the histogram. 
 
 ```{r echo=FALSE}
 selectInput("hist2_scale", label = "Select type of scale",choices = c("linear", "log"), selected="linear")
@@ -133,18 +136,16 @@ plotOutput("hist2_plot")
 ```
 
 ```{r context="server"}
-load(here("data", "bmi_diabetes.rda"))
-
-bmi_diabetes_small <- bmi_diabetes %>% dplyr::sample_n(size=200)
 
 output$hist2_plot <- renderPlot({
-outPlot <- bmi_diabetes_small %>% ggplot(aes(x=BMI)) + geom_histogram(bins = input$hist_slider, fill="white", color="black")
+  outPlot <- bmi_diabetes_small %>% ggplot(aes(x=BMI)) + 
+    geom_histogram(bins = input$hist_slider, fill="white", color="black")
 
-if(input$hist2_scale == "log"){
-  outPlot <- outPlot + scale_x_log10()
-}
+  if(input$hist2_scale == "log"){
+    outPlot <- outPlot + scale_x_log10()
+  }
 
-outPlot
+  outPlot
 })
 ```
 
@@ -157,11 +158,8 @@ selectInput("hist3_scale", label = "Select type of scale",choices = c("histogram
 plotOutput("cont1_plot")
 ```
 
-
 ```{r context="server"}
 #load(here("data", "bmi_diabetes.rda"))
-
-bmi_diabetes_small <- bmi_diabetes %>% dplyr::sample_n(size=200)
 
 output$cont1_plot <- renderPlot({
 outPlot <- bmi_diabetes_small %>% ggplot(aes(x=BMI)) 
@@ -197,7 +195,7 @@ Take a look at the distributions of annual income graph here and compare 1960 to
 
 https://flowingdata.com/2016/06/28/distributions-of-annual-income/
 
-```{r distributions}
+```{r distributions, echo=FALSE}
 question("What is the major difference between the 1960 and 2016 annual income distributions?",
   answer("[The gap between those who make 200K and more compared to the less is larger for the different professions.]", correct=TRUE, message="Correct. There are 4 patients who are alive and not smokers."),
   answer("There are 5 patients.", message="Not quite. Go back and count."),
@@ -207,11 +205,13 @@ question("What is the major difference between the 1960 and 2016 annual income d
 
 ## Relationships: 2 categorical variables
 
+Now we're going to delve into ways of visualizing the relationships between two categorical variables.
+
 ### Association
 
 ```{r echo = FALSE}
 load(here("data", "bmi_diabetes.rda"))
-
+set.seed(1)
 bmi_diabetes_small <- bmi_diabetes %>% dplyr::sample_n(size=200)
 
 bmi_diabetes_small %>% select(BMIstatus, Diabetes) %>% table()
@@ -221,7 +221,9 @@ bmi_diabetes_small %>% select(BMIstatus, Diabetes) %>% table()
 
 Change the barplot type from `regular` to `proportional`. What changes? (look at the scale before/after).
 
-Which barplot type helps you answer the question:
+Which barplot type helps you answer the question: "Is there a larger proportion of people with Diabetes with High BMI compared to those who have a low BMI?"
+
+Which barplot helps you understand how many people had Diabetes with low BMI?
 
 ```{r echo = FALSE}
 selectInput("bar_control1", "Select type of Barplot", choices=c("proportional", "regular"), selected="regular")
@@ -246,14 +248,98 @@ output$bar_1 <- renderPlot({
 
 ```
 
+### Quiz Yourself
+
+```{r echo=FALSE}
+bmi_diabetes_small %>% filter(!is.na(Gender)) %>% ggplot(aes(x=Gender, fill=Diabetes)) +
+  geom_bar(position="fill", color="black")
+```
+
+```{r proportions, echo=FALSE}
+question("Is there a large difference in proportions of those who have Diabetes between Men and Women in our study?",
+  answer("Yes, and there is a large difference", message="Take a look at the proportions between men and women again."),
+  answer("Yes, there is a difference, but it's not very big", correct=TRUE, message="Yes, there's a difference"),
+  answer("No, there is no difference", message="There's a little difference, take another look."),
+  random_answer_order = TRUE,
+  allow_retry = TRUE
+)
+```
+
+### What about multiple categories?
+
+We can try to see if multiple categories line up, but one of the issues is tracking size changes.
+
+[The Bechdel Test] is a test to determine whether women are represented fairly in movies. 
+
+Look at the graph below. What does the black line in the middle of the graph represent? Are there more movies now that pass the test than fail them?
+
+What about the subcategories? Is it easy or hard to see if they are changing with time?
+
+![Bechdel Test and Movies](images/hickey-bechdel-11.png)
+
 ## Relationships: 1 categorical, 1 continuous
 
-When we are looking for relationships 
+Now we're going to investigate the relationship between one variable that is continuous and another variable that is categorical.
+
+### Quick Review of Mathematical Terms
+
+Make sure you understand the following terms before you go on. [Here's a quick review in case you need it.](https://www.verywellmind.com/how-to-identify-and-calculate-the-mean-median-or-mode-2795785)
+
+- *percentile* 
+- *median*
+- *mean* 
+- *mode* 
 
 ### Boxplots
 
+When you are trying to understand the relationship between a continuous variable and a categorical variable, you want to use a boxplot.
+
+A [boxplot](https://en.wikipedia.org/wiki/Box_plot) allows you to visually compare the distributions by way of a [five number summary](https://en.wikipedia.org/wiki/Five-number_summary) which includes:
+
+- Sample minimum (the smallest value)
+- First [quartile](https://en.wikipedia.org/wiki/Quartile) (*Q<sub>1</sub>*) which is the 25th percentile
+- Second quartile (*Q<sub>2</sub>*) also known as the [*median*](https://en.wikipedia.org/wiki/Median)
+- Third quartile (*Q<sub>3</sub>*) which is the 75th percentile
+- Sample maximum (the largest value)
+
+```{r boxplot, fig.height=7, fig.width=7, out.width=500, echo=FALSE}
+five_number_summary <- iris %>%
+  group_by(1) %>%
+  summarize(
+    `Sample minimum` = min(Sepal.Length),
+    `1st quartile (25th percentile)` = quantile(Sepal.Length, 0.25),
+    `2nd quartile (median)` = median(Sepal.Length),
+    `3rd quartile (75th percentile)` = quantile(Sepal.Length, 0.75),
+    `Sample maximum` = max(Sepal.Length)
+  ) %>%
+  tidyr::gather(Summary, Sepal.Length, -1) %>%
+  select(-1)
+ggplot(data = iris, aes(y = Sepal.Length, x = 1)) +
+  geom_boxplot(color = "gray50") +
+  geom_point(data = five_number_summary, size = 9, shape = "←", position = position_nudge(x = 0.025)) +
+  geom_label(
+    data = five_number_summary,
+    aes(label = Summary, hjust = "left"),
+    nudge_x = 0.025, size = 5, label.padding = unit(0.5, "lines")
+  ) +
+  theme_minimal(14) +
+  labs(y = "Sepal length (cm)", title = "Box plot", x = NULL) +
+  theme(
+    panel.grid.major.y = element_line(linetype = "dashed", color = "gray80"),
+    panel.grid.minor.y = element_blank(),
+    panel.grid.major.x = element_blank(),
+    panel.grid.minor.x = element_blank(),
+    axis.text.x = element_blank()
+  )
+```
+[Example Modified from Mikhail Popov](https://github.com/bearloga/wmf-allhands18)
+
+### Understanding Boxplots
+
+Try the different categorical variables out in the data. Is there a difference in medians between the categories? Is that difference meaningful?
+
 ```{r echo=FALSE}
-selectInput("boxplot1_selection", "Select Categorical Variable", choices = c("Diabetes", "Gender", "BMIstatus"), selected ="Diabetes")
+selectInput("boxplot1_selection", "Select Categorical Variable", choices = c("Diabetes", "Gender"), selected ="Diabetes")
 plotOutput("boxplot1")
 ```
 
@@ -265,14 +351,52 @@ output$boxplot1 <- renderPlot({
 })
 ```
 
+```{r boxplot2, echo=FALSE}
+question("Is there a difference between median BMI between those that have diabetes that those who dont?",
+         answer("no, there isn't a difference", message=""),
+         answer("yes, but the difference is small", message = "You're on the right track. Take a look at the categorization of BMI"),
+         answer("yes, and the difference is big", correct = TRUE),
+         random_answer_order = TRUE, allow_retry = TRUE)
+```
+
+### Boxplots do lose some detail
+
+Take a look at the boxplot and the violin plot side by side. What do you notice?
 
 ```{r echo=FALSE}
-
+plotOutput("box_v_violin")
 ```
+
+```{r context="server"}
+output$box_v_violin <- renderPlot({
+boxp <- bmi_diabetes_small %>% ggplot(aes(x=Diabetes, y=BMI, fill=Diabetes)) +
+  geom_boxplot()
+
+viop <- bmi_diabetes_small %>% ggplot(aes(x=Diabetes, y=BMI, fill=Diabetes)) +
+  geom_violin()
+
+cowplot::plot_grid(boxp, viop)
+})
+```
+
+
 
 ## Relationships: 2 continuous variables
 
+### Scatterplots
+
+
+
+### Playing with Ranges and Scales
+
+
+### Fit Lines
+
+
+
 ## Relationships: 1 variable versus time
+
+
 
 ### Time Series
 
@@ -290,8 +414,63 @@ Many types of clinical data can be represented as time series:
 
 Try modifying the beginning and end points for the data. Can you make it look like there is an overall downward trend? 
 
+```{r}
 
+```
 ---
+
+## Going beyond: Aesthetics
+
+### Aesthetic Properties: Color
+
+Beyond our basic plots, we might want to map different measurements to different visual properties.
+
+For the 2x2 bar plots, we mapped Diabetes to *color*.
+
+```{r echo=FALSE}
+bmi_diabetes_small %>% filter(!is.na(BMIstatus)) %>% ggplot(aes(x=BMIstatus, fill=Diabetes)) + 
+  geom_bar(position="fill", color="black")
+```
+
+For scatterplots, we might want to code categorical data as *color* like the example below:
+
+```{r echo=FALSE}
+bmi_diabetes_small %>% ggplot(aes(x=Age, y=BMI, color=Diabetes)) + geom_point() 
+```
+
+### Aesthetic Properties: Shape
+
+Journals used to only allow black and white figures, so color couldn't be used. One alternative is mapping our `Diabetes` Variable to `shape`
+
+```{r echo=FALSE}
+bmi_diabetes_small %>% ggplot(aes(x=Age, y=BMI, shape=Diabetes, fill=Diabetes)) + geom_point() 
+```
+
+### Aesthetic Properties: Cats
+
+(This is just here for your amusement).
+
+```{r}
+library(CatterPlots)
+x <- -10:10
+y <- -x^2 + 10
+meow <- multicat(xs=x, ys=y, cat=c(1,2,3), catcolor=list('#33FCFF','#FF0000'), canvas=c(-0.1,1.1, -0.1, 1.1))
+```
+
+### Waterfall Plots (optional)
+
+Another way to visualize the relationship between a continuous variable and a categorical variable is a waterfall plot. With a waterfall plot, we plot each continuous value as a single bar and sort them increasing value. Each bar is then colored by the categorical variable.
+
+Each of these bars represents a person who smokes (Y/N) and their age. If you are older than 60, are you less likely to smoke?
+
+```{r}
+load(here("data", "Whickham.rda"))
+
+Whickham %>% sample_n(size=50) %>% arrange(age) %>% mutate(row_num=1:nrow(.)) %>% ggplot(aes(x=row_num, y=age, fill=smoker)) + geom_bar(stat="identity")
+
+
+```
+
 
 ### Visualization Lies
 
