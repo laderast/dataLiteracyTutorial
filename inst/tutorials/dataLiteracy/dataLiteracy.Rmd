@@ -92,8 +92,8 @@ bmi_diabetes[1:10,]
 
 ```{r datatable, echo=FALSE}
 question("How many patients have High BMI (BMIstatus = `High`) and are Male (Gender = `Male`) from these first 10 rows?",
-  answer("There are 3 patients.", message="Not quite. Go back and count."),
-  answer("There are 4 patients.", correct=TRUE, message="Correct. There are 4 patients who have high BMI and are male."),
+  answer("There are 3 patients.", correct=TRUE, message="Correct. There are 3 patients who have high BMI and are male."),
+    answer("There are 4 patients.", message="Not quite. Go back and count."),
   answer("There are 5 patients.", message="Not quite. Go back and count."),
   allow_retry = TRUE
 )
@@ -524,14 +524,28 @@ Many types of clinical data can be represented as time series:
 - Patient Visits
 - Nursing Shifts
 
-### Playing with time scales
+[Line charts](https://en.wikipedia.org/wiki/Line_chart) are the most common way to visualize [time series](https://en.wikipedia.org/wiki/Time_series) data, with time **usually** as the horizontal X axis and range of a quantitative variable as the vertical Y axis:
 
-Try modifying the beginning and end points for the data. Can you make it look like there is an overall downward trend? 
-
-```{r}
-bmi_diabetes_small %>% ggplot(aes(x=Age, y=BMI)) + geom_point()
+```{r pageviews, cache=TRUE}
+enwiki_pvs <- pageviews::project_pageviews(end = Sys.Date() - 1)
+frwiki_pvs <- pageviews::project_pageviews(project = "fr.wikipedia", end = Sys.Date() - 1)
+pvs <- rbind(enwiki_pvs, frwiki_pvs)
+pvs$language <- factor(pvs$language, c("en", "fr"), c("English", "French"))
 ```
----
+```{r tsplot, fig.cap='You may notice that the linear scale and the difference in magnitude makes it difficult to notice patterns for French Wikipedia. Perhaps this chart can be improved later in the workshop?'}
+ggplot(pvs, aes(x = date, y = views / 1e6, color = language)) +
+  geom_line() +
+  scale_color_brewer("Language", palette = "Set1") +
+  scale_x_datetime(date_breaks = "4 months", date_labels = "%b '%y") +
+  labs(
+    x = "Date", y = "Pageviews (millions)",
+    title = "French & English Wikipedia daily pageviews",
+    subtitle = "All platforms, all agent types"
+  ) +
+  theme_minimal(14)
+```
+
+[Example modified from wmf-allhands18](https://bearloga.github.io/wmf-allhands18/)
 
 ## Quiz Yourself
 
@@ -605,6 +619,7 @@ https://github.com/laderast/dsiexplore
 - 2 categorical variables: barplots
 - 1 categorical variable, 1 continuous variable: boxplots
 - 2 continuous variables, scatterplots
+- 1 variable versus time: lineplot
 - Need to understand what the graph is trying to communicate
 - Not all charts are good.
 
