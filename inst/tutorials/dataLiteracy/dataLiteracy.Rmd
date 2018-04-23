@@ -525,25 +525,7 @@ Many types of clinical data can be represented as time series:
 - Nursing Shifts
 
 [Line charts](https://en.wikipedia.org/wiki/Line_chart) are the most common way to visualize [time series](https://en.wikipedia.org/wiki/Time_series) data, with time **usually** as the horizontal X axis and range of a quantitative variable as the vertical Y axis:
-
-```{r pageviews, cache=TRUE}
-enwiki_pvs <- pageviews::project_pageviews(end = Sys.Date() - 1)
-frwiki_pvs <- pageviews::project_pageviews(project = "fr.wikipedia", end = Sys.Date() - 1)
-pvs <- rbind(enwiki_pvs, frwiki_pvs)
-pvs$language <- factor(pvs$language, c("en", "fr"), c("English", "French"))
-```
-```{r tsplot, fig.cap='You may notice that the linear scale and the difference in magnitude makes it difficult to notice patterns for French Wikipedia. Perhaps this chart can be improved later in the workshop?'}
-ggplot(pvs, aes(x = date, y = views / 1e6, color = language)) +
-  geom_line() +
-  scale_color_brewer("Language", palette = "Set1") +
-  scale_x_datetime(date_breaks = "4 months", date_labels = "%b '%y") +
-  labs(
-    x = "Date", y = "Pageviews (millions)",
-    title = "French & English Wikipedia daily pageviews",
-    subtitle = "All platforms, all agent types"
-  ) +
-  theme_minimal(14)
-```
+![](images/tsplot-1.png)
 
 [Example modified from wmf-allhands18](https://bearloga.github.io/wmf-allhands18/)
 
