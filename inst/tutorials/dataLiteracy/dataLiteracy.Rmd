@@ -9,13 +9,17 @@ runtime: shiny_prerendered
 ---
 
 ```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, warning=FALSE, message=FALSE)
 options(htmltools.dir.version = FALSE)
 library(here)
 library(tidyverse)
 library(learnr)
 library(cowplot)
+library(NHANES)
+library(rlang)
 library(fivethirtyeight)
 library(dataLiteracyTutorial)
+data("NHANES")
 theme_set(theme_classic())
 theme_update(text=element_text(size = 20)) 
 data("bmi_diabetes",package = "dataLiteracyTutorial")
@@ -132,10 +136,34 @@ table(bmi_diabetes$Diabetes)
 Here's another way to look at the data, a bar plot. You can instantly see which of the groups is larger.
 
 ```{r echo=TRUE}
-bmi_diabetes %>% ggplot(aes(x=Diabetes)) + geom_bar() + ggtitle("Summary of Patients: Diabetes")
+bmi_diabetes  %>% tidyr::drop_na() %>% ggplot(aes(x=Diabetes)) + geom_bar() + ggtitle("Summary of Patients: Diabetes")
 ```
 
 Sometimes it is easier to look at a table, but usually a bar chart will make things more obvious.
+
+### Stacked Barplots
+
+We can also stack values on top of each other to make a stacked barplot. This can be useful when comparing categories.
+
+```{r echo=FALSE}
+bmi_diabetes %>% tidyr::drop_na() %>% ggplot(aes(x=factor(1), fill=Diabetes)) + geom_bar(width=1, position = "stack")
+```
+
+### Stacked Barplots vs Pie Charts
+
+Pie charts are ok for variables that just have two or three categories, but they become difficult to compare across two pie charts. 
+
+Take a look at the barchart and pie chart. Which group (`male` or `female`) has the larger number of Diabetes patients?
+
+```{r echo=FALSE}
+outPlot <- bmi_diabetes %>% tidyr::drop_na() %>% ggplot(aes(x=factor(1), fill=Diabetes)) + geom_bar(width=1) + facet_grid(".~Gender")
+
+outPlot + ggtitle("Stacked Bar Plot comparing Diabetes by Gender")
+
+outPlot2 <- outPlot + coord_polar("y", start=0)
+
+outPlot2 + ggtitle("Pie Charts comparing Diabetes by Gender")
+```
 
 ## Continuous Data
 
@@ -145,9 +173,9 @@ A [histogram](https://en.wikipedia.org/wiki/Histogram) shows the distribution of
 
 You can think of a histogram as a bar graph where the x variable is numeric. 
 
-```{r}
+```{r echo=FALSE}
 set.seed(3)
-load(here("data", "bmi_diabetes.rda"))
+data("bmi_diabetes",package = "dataLiteracyTutorial")
 
 bmi_diabetes_small <- bmi_diabetes %>% dplyr::sample_n(size=200)
 
@@ -160,7 +188,7 @@ bmi_diabetes_small %>% ggplot(aes(x=BMI)) +
 
 ### Histogram: Play with the Bins
 
-To make a histogram, we have to bin the data. or convert the continuous data into ranges. 
+To make a histogram, we have to bin the data, or convert the continuous data into ranges. 
 
 Try adjusting the number of bins for the histogram. What details gets lost as you adjust the number of bins downwards?
 
@@ -170,7 +198,7 @@ plotOutput("hist_plot")
 ```
 
 ```{r context="server"}
-load(here("data", "bmi_diabetes.rda"))
+data("bmi_diabetes",package = "dataLiteracyTutorial")
 set.seed(3)
 
 bmi_diabetes_small <- bmi_diabetes %>% dplyr::sample_n(size=200)
@@ -178,7 +206,7 @@ bmi_diabetes_small <- bmi_diabetes %>% dplyr::sample_n(size=200)
 output$hist_plot <- renderPlot(
   bmi_diabetes_small %>% ggplot(aes(x=BMI)) + 
     geom_histogram(bins = input$hist_slider, 
-                   fill="white", color="black")
+                   fill="white", color="black") + xlim(c(10, 85))
 )
 ```
 
@@ -200,6 +228,8 @@ output$hist2_plot <- renderPlot({
     outPlot <- outPlot + scale_x_log10(position="bottom")
   }
 
+  outPlot <- outPlot + ggtitle(paste0("BMI scores (", input$hist2_scale, " scale)"))
+  
   outPlot
 })
 ```
@@ -237,9 +267,11 @@ bins <- 30
   }
 
   if(input$hist3_scale == "dotplot"){
-    outPlot <- outPlot + geom_dotplot(bins=bins)
+    outPlot <- outPlot + geom_dotplot(bins=bins, size=1)
   }
 
+  outPlot <- outPlot + xlim(c(10, 85))
+  
   outPlot
 })
 ```
@@ -249,22 +281,9 @@ bins <- 30
 Let's look at our other continuous covariate, `Age`. Does the dotplot show anything weird to you?
 
 ```{r}
-bmi_diabetes_small %>% ggplot(aes(x=Age)) + geom_dotplot() + xlim(c(21, 90)) 
+bmi_diabetes_small %>% ggplot(aes(x=Age)) + geom_dotplot(size=1) + xlim(c(21, 90)) 
 ```
 
-### Quiz Yourself: Distributions of annual income
-
-Take a look at the distributions of annual income graph here and compare 1960 to 2016.
-
-https://flowingdata.com/2016/06/28/distributions-of-annual-income/
-
-```{r distributions, echo=FALSE}
-question("What is the major difference between the 1960 and 2016 annual income distributions?",
-  answer("[The gap between those who make 200K and more compared to the less is larger for the different professions.]", correct=TRUE, message="Correct. There are 4 patients who are alive and not smokers."),
-  answer("There are 5 patients.", message="Not quite. Go back and count."),
-  allow_retry = TRUE
-)
-```
 
 ## Relationships: 2 categorical variables
 
@@ -273,7 +292,7 @@ Now we're going to delve into ways of visualizing the relationships between two 
 ### Association
 
 ```{r echo = FALSE}
-load(here("data", "bmi_diabetes.rda"))
+data("bmi_diabetes",package = "dataLiteracyTutorial")
 set.seed(3)
 bmi_diabetes_small <- bmi_diabetes %>% dplyr::sample_n(size=200)
 
@@ -328,17 +347,6 @@ question("Is there a large difference in proportions of those who have Diabetes 
 )
 ```
 
-### What about multiple categories?
-
-We can try to see if multiple categories line up, but one of the issues is tracking size changes.
-
-[The Bechdel Test](http://bechdeltest.com) is a test to determine whether women are represented fairly in movies. 
-
-Look at the graph below. What does the black line in the middle of the graph represent? Are there more movies now that pass the test than fail them?
-
-What about the subcategories, such as `Women only talk about men`? Is it easy or hard to see if they are changing with time?
-
-![Bechdel Test and Movies](images/hickey-bechdel-11.png)
 
 ## Relationships: 1 categorical, 1 continuous
 
@@ -363,6 +371,7 @@ A [boxplot](https://en.wikipedia.org/wiki/Box_plot) allows you to visually compa
 - Second quartile (*Q<sub>2</sub>*) also known as the [*median*](https://en.wikipedia.org/wiki/Median). By definition, this is the middle of the data - 50% of the data is above this value and 50% is below this value.
 - Third quartile (*Q<sub>3</sub>*) which is the 75th percentile
 - Sample maximum (the largest value)
+- Outliers (very large or small values) are represented as dots.
 
 ```{r boxplot, fig.height=7, fig.width=7, out.width=500, echo=FALSE}
 five_number_summary <- iris %>%
@@ -440,28 +449,60 @@ output$box_v_violin <- renderPlot({
 })
 ```
 
-
 ## Relationships: 2 continuous variables
 
 ### Scatterplots
 
-Scatterplots show the relationship between two continuous variables.
+Scatterplots show the relationship between two continuous variables. We can add what's called a `fit line` between the two variables. Ideally, we want to see a line that is diagonal as possible. A flat line means there is no association between variables.
+
+In this case, we are showing that knowing the values of one variable (`Weight`) means that you know something about another variable (`BMI`). Anyone know why?
 
 ```{r echo=FALSE}
-bmi_diabetes_small %>% ggplot(aes(x=Age, y=BMI)) + geom_point()
+NHANES %>% ggplot(aes(x=Weight,y=BMI)) + geom_point() + stat_smooth(method="lm",se = FALSE)
 ```
 
-### Playing with Ranges and Scales
+### Look at the relationship between continuous variables
 
+Now you can try to get a feel for what correlation (linear and non-linear) looks like. Try a few pairs, such as (`BMI` and `Total Cholesterol`), (`BMI` and `Testosterone`), and (`Height`, `Income`).  Before you look at the data, make a guess whether there is a relationship between variables.
 
+Do you see a relationship between these two variables? How strong is the relationship.
 
-### Trend Lines
+```{r}
+cont_vars = c("Age","Weight","Height","BMI","Total Cholesterol"= "TotChol","Income"= "HHIncomeMid","Testosterone")
 
+selectInput("select_x", "X-axis", choices = cont_vars,
+            selected = "Weight")
+selectInput("select_y", "Y-axis", choices = cont_vars,
+            selected = "BMI")
+plotOutput("scatterPlotCont")
+```
 
+```{r context="server"}
+## taken from DSIExplore package - code by Jessica Minnier
+
+# should wrap this into the package and not repeat like this
+# need to figure out a better way to use quoted vs quosures
+plot_w_cor_quotes = function(df,cont_x,cont_y) {
+  enquo_x = quo(!! sym(cont_x))
+  enquo_y = quo(!! sym(cont_y))
+  #enquo_color = quo(!! sym(color))
+  tmpdat =  df%>%summarize(x=mean(range(!!enquo_x,na.rm=T)),
+                           y=max(!!enquo_y,na.rm=T),
+                           cortext=paste("Pearson's r = ", round(cor(!!enquo_x, !!enquo_y,use="complete.obs"), digits = 2),
+                                         "\nSpearman's r = ", round(cor(!!enquo_x, !!enquo_y,use="complete.obs",method="spearman"), digits = 2))
+  )
+  df %>% ggplot(aes_(x=enquo_x,y=enquo_y)) + geom_point() + stat_smooth(method="lm",se = FALSE) #+ 
+    #geom_text(data = tmpdat,aes(x=x,y=y,label=cortext),inherit.aes = FALSE,size=4)
+}
+
+  output$scatterPlotCont <- renderPlot(
+      NHANES %>% plot_w_cor_quotes(input$select_x,input$select_y)
+      )
+
+```
+[Code adapted from DSIExplore by Jess Minnier](https://github.com/laderast/dsiexplore)
 
 ## Relationships: 1 variable versus time
-
-
 
 ### Time Series
 
@@ -484,7 +525,69 @@ bmi_diabetes_small %>% ggplot(aes(x=Age, y=BMI)) + geom_point()
 ```
 ---
 
+## Quiz Yourself
+
+### Distributions of annual income
+
+Take a look at the distributions of annual income graph here and compare 1960 to 2016.
+
+https://flowingdata.com/2016/06/28/distributions-of-annual-income/
+
+```{r distributions, echo=FALSE}
+question("For healthcare practicioners, what is true about comparing income from 1960 to 2016?",
+  answer("The maximum healthcare income is higher for 2016 to 1960", correct=TRUE, message="Yes, the highest paid income is over $200,000 for 2016, and the highest income for 1960 is about $170,000"),
+  answer("In general, healthcare salaries have increased", message="Yes. True.", correct=TRUE),
+  answer("Healthcare professionals like cats", message="That's nowhere in the graph!"), 
+  allow_retry = TRUE
+)
+```
+
+### Quiz Yourself: Looking at Multiple Categories
+
+[The Bechdel Test](http://bechdeltest.com) is a test to determine whether women are represented fairly in movies. 
+
+Look at the graph below. 
+
+![Bechdel Test and Movies](images/hickey-bechdel-11.png)
+
+```{r bechdel}
+question("What does the black line in the middle of the graph represent?", 
+         answer("It's just for show", message="Take a look at the colors"), 
+         answer("Men versus Women", message="take a look at the legend again."),
+         answer("The division between those movies that pass the test, and those that fail", correct = TRUE), allow_retry = TRUE)
+
+question("Are there more movies in 2010-2013 that pass the test than those in 1970-1974?", 
+         answer("Yes, there are more movies that pass the test",correct=TRUE), answer("No, there are not more movies that pass the test."), allow_retry = TRUE)
+```
+  
+What about the subcategories, such as `Women only talk about men`? Is it easy or hard to see if they are changing with time?
+
+### Did your senatorial vote predict your presidential vote?
+
+Take a look at the scatterplot below. Each dot represents a state polled and their percentage Republican or Democrat. Is there a relationship between knowing the 2012 presidential results and the 2014 presidential results? 
+
+![https://fivethirtyeight.com/features/can-a-democrat-still-win-the-kentucky-governors-race/](images/kentucky-governor1.png)
+
+```{r vote}
+question("For the chart above, were voters presidential preference in 2012 correlated with their vote for senators in 2014?",
+         answer("Yes, there's a strong correlation", correct = TRUE),
+         answer("Yes, but it's a small correlation", 
+                message="Look at the percentages. Is that a big effect or not?"),
+         answer("No, there is no correlation.", 
+                message="Take a look at the line. Is it on the diagonal?"))
+```
+
+## Take Home Points
+
+- 2 categorical variables: barplots
+- 1 categorical variable, 1 continuous variable: boxplots
+- 2 continuous variables, scatterplots
+- Need to understand what the graph is trying to communicate
+- Not all charts are good.
+
 ## Going beyond: Aesthetics
+
+The following section is optional.
 
 ### Aesthetic Properties: Color
 
@@ -529,7 +632,8 @@ Another way to visualize the relationship between a continuous variable and a ca
 Each of these bars represents a person who smokes (Y/N) and their age. If you are older than 60, are you less likely to smoke?
 
 ```{r}
-load(here("data", "Whickham.rda"))
+
+data("Whickham",package = "dataLiteracyTutorial")
 
 Whickham %>% sample_n(size=50) %>% arrange(age) %>% mutate(row_num=1:nrow(.)) %>% ggplot(aes(x=row_num, y=age, fill=smoker)) + geom_bar(stat="identity")
 
@@ -540,13 +644,10 @@ Whickham %>% sample_n(size=50) %>% arrange(age) %>% mutate(row_num=1:nrow(.)) %>
 ### Visualization Lies
 
 https://flowingdata.com/2017/02/09/how-to-spot-visualization-lies/
-http://serialmentor.com/dataviz/
 
----
+### Acknowledgements
 
-https://chronicdata.cdc.gov/Behavioral-Risk-Factors/Behavioral-Risk-Factor-Surveillance-System-BRFSS-P/dttw-5yxu
-
-### Partially adapted from:
+Portions of this tutorial are partially adapted from:
 
 https://github.com/bearloga/wmf-allhands18
 https://github.com/laderast/dsiexplore
