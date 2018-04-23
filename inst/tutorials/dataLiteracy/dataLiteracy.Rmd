@@ -21,7 +21,7 @@ library(fivethirtyeight)
 library(dataLiteracyTutorial)
 data("NHANES")
 theme_set(theme_classic())
-theme_update(text=element_text(size = 16)) 
+theme_update(text=element_text(size = 13)) 
 data("bmi_diabetes",package = "dataLiteracyTutorial")
 ```
 
@@ -91,10 +91,10 @@ bmi_diabetes[1:10,]
 ```
 
 ```{r datatable, echo=FALSE}
-question("How many patients have Diabetes (Diabetes = `yes`) and are Male (Gender = `Male`) from these first 10 rows?",
-  answer("There are 3 patients.", correct=TRUE, message="Correct. There are 3 patients who have diabetes and are male."),
-  answer("There are 4 patients.", message="Not quite. Go back and count."),
-  answer("There are 5 patients.", message="Not quite. Go back and count.."),
+question("How many patients have High BMI (BMIstatus = `High`) and are Male (Gender = `Male`) from these first 10 rows?",
+  answer("There are 3 patients.", message="Not quite. Go back and count."),
+  answer("There are 4 patients.", correct=TRUE, message="Correct. There are 4 patients who have high BMI and are male."),
+  answer("There are 5 patients.", message="Not quite. Go back and count."),
   allow_retry = TRUE
 )
 ```
@@ -348,9 +348,8 @@ bmi_diabetes_small %>% filter(!is.na(Gender)) %>% ggplot(aes(x=Gender, fill=Diab
 
 ```{r proportions, echo=FALSE}
 question("Is there a large difference in proportions of those who have Diabetes between Men and Women in our study?",
-  answer("Yes, and there is a large difference", message="Take a look at the proportions between men and women again."),
-  answer("Yes, there is a difference, but it's not very big", correct=TRUE, message="Yes, there's a difference"),
-  answer("No, there is no difference", message="There's a little difference, take another look."),
+  answer("Yes, there is a difference", correct=TRUE, message="Yes, there's a difference"),
+  answer("No, there is no difference", message="There's a difference between the proportions, take another look."),
   random_answer_order = TRUE,
   allow_retry = TRUE
 )
@@ -586,6 +585,21 @@ question("For the chart above, were voters presidential preference in 2012 corre
                 message="Take a look at the line. Is it on the diagonal?"))
 ```
 
+## For More Info
+
+### Visualization Lies
+
+https://flowingdata.com/2017/02/09/how-to-spot-visualization-lies/
+
+http://fivethirtyeight.com/features/you-cant-trust-what-you-read-about-nutrition/
+
+### Acknowledgements
+
+Portions of this tutorial are partially adapted from:
+
+https://github.com/bearloga/wmf-allhands18
+https://github.com/laderast/dsiexplore
+
 ## Take Home Points
 
 - 2 categorical variables: barplots
@@ -649,15 +663,4 @@ Whickham %>% sample_n(size=50) %>% arrange(age) %>% mutate(row_num=1:nrow(.)) %>
 
 ```
 
-
-### Visualization Lies
-
-https://flowingdata.com/2017/02/09/how-to-spot-visualization-lies/
-
-### Acknowledgements
-
-Portions of this tutorial are partially adapted from:
-
-https://github.com/bearloga/wmf-allhands18
-https://github.com/laderast/dsiexplore
 
