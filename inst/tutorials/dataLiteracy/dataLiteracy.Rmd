@@ -21,7 +21,7 @@ library(fivethirtyeight)
 library(dataLiteracyTutorial)
 data("NHANES")
 theme_set(theme_classic())
-theme_update(text=element_text(size = 20)) 
+theme_update(text=element_text(size = 16)) 
 data("bmi_diabetes",package = "dataLiteracyTutorial")
 ```
 
@@ -64,24 +64,23 @@ http://care.diabetesjournals.org/content/30/8/1959
 ### What a graph needs
 
 + Title (what it represents)
-+ Labeled Axes
-    + Each aesthetic should have a scale/legend
-+ How many variables and their types
++ Labeled Axes (with units, preferably)
++ Variables and how they are represented
 + Scales
-+ Mapping the data to a visual property
-
-- Title (most plots should have this)
-- Axis labels (almost all plots should have this)
+    + Is it a count or is it a proportion?
 - How many variables and their types
     - Including ones used to dictate colors, shapes, patterns, sizes, opacities, etc.
     - Independent ("*predictor*") variables (e.g. time) are usually on the X (horizontal) axis
         - Occasionally time is plotted on the vertical axis for specific reasons
     - Dependent ("*outcome*" / "*response*") variables are usually on the Y (vertical) axis
-- Scales (especially log-transformed ones)
+
+```{r echo=FALSE}
+NHANES %>% ggplot(aes(x=Weight,y=BMI)) + geom_point() + stat_smooth(method="lm",se = FALSE) + ggtitle("Weight vs. BMI in NHANES study") 
+```
 
 ## The Data (NHANES)
 
-We're going to look at data from a study called NHANES (National Health and Nutrition Survey). 
+We're going to look at data from a study called [NHANES (National Health and Nutrition Survey)](). 
 
 ### What does the data actually look like?
 
@@ -123,7 +122,7 @@ question("What can we learn from this summary table?",
 
 ## Categorical Data
 
-### Bar Graphs
+Categorical data has a limited number of values. Some examples include: your home state, ethnicity, what kind of phone you have (iOS/Android).
 
 ### Let's look at Diabetes in our patients
 
@@ -136,7 +135,7 @@ table(bmi_diabetes$Diabetes)
 Here's another way to look at the data, a bar plot. You can instantly see which of the groups is larger.
 
 ```{r echo=TRUE}
-bmi_diabetes  %>% tidyr::drop_na() %>% ggplot(aes(x=Diabetes)) + geom_bar() + ggtitle("Summary of Patients: Diabetes")
+bmi_diabetes %>% tidyr::drop_na() %>% ggplot(aes(x=Diabetes)) + geom_bar() + ggtitle("Summary of Patients: Diabetes")
 ```
 
 Sometimes it is easier to look at a table, but usually a bar chart will make things more obvious.
@@ -146,21 +145,51 @@ Sometimes it is easier to look at a table, but usually a bar chart will make thi
 We can also stack values on top of each other to make a stacked barplot. This can be useful when comparing categories.
 
 ```{r echo=FALSE}
-bmi_diabetes %>% tidyr::drop_na() %>% ggplot(aes(x=factor(1), fill=Diabetes)) + geom_bar(width=1, position = "stack")
+bmi_diabetes %>% tidyr::drop_na() %>% ggplot(aes(x=factor(1), fill=Diabetes)) + geom_bar(width=1, position = "stack", color="black") +  theme(axis.title.x = element_blank(),
+    axis.ticks = element_blank(),
+    axis.text.x = element_blank())
+```
+
+### Look at the scale
+
+What does the y-axis represent in each of these graphs?
+
+```{r echo=FALSE, fig.width=7}
+plot1 <- bmi_diabetes %>% tidyr::drop_na() %>% ggplot(aes(x=factor(1), fill=Diabetes)) + geom_bar(width=1, position = "stack", color="black") +  theme(axis.title.x = element_blank(),
+    axis.ticks = element_blank(),
+    axis.text.x = element_blank()) + ggtitle("Counts of Diabetes Patients")
+
+plot2 <- bmi_diabetes %>% tidyr::drop_na() %>% ggplot(aes(x=factor(1), fill=Diabetes)) + geom_bar(width=1, position = "fill", color="black") +  theme(axis.title.x = element_blank(),
+    axis.ticks = element_blank(),
+    axis.text.x = element_blank()) + ggtitle("Proportions of Diabetes Patients")
+
+cowplot::plot_grid(plot1, plot2)
 ```
 
 ### Stacked Barplots vs Pie Charts
 
 Pie charts are ok for variables that just have two or three categories, but they become difficult to compare across two pie charts. 
 
-Take a look at the barchart and pie chart. Which group (`male` or `female`) has the larger number of Diabetes patients?
+Take a look at the barchart and pie chart. Which group (`male` or `female`) has the larger proportion of Diabetes patients? (Note that the scale has changed!)
 
 ```{r echo=FALSE}
-outPlot <- bmi_diabetes %>% tidyr::drop_na() %>% ggplot(aes(x=factor(1), fill=Diabetes)) + geom_bar(width=1) + facet_grid(".~Gender")
+outPlot <- bmi_diabetes %>% tidyr::drop_na() %>% ggplot(aes(x=factor(1), fill=Diabetes)) + geom_bar(position="fill",width=1, color="black") + facet_grid(".~Gender") + 
+  
+  theme(axis.title.x = element_blank(),
+    axis.ticks = element_blank(),
+        axis.title.y = element_blank(),
+    axis.text.x = element_blank())
 
 outPlot + ggtitle("Stacked Bar Plot comparing Diabetes by Gender")
 
-outPlot2 <- outPlot + coord_polar("y", start=0)
+outPlot2 <- outPlot + coord_polar("y", start=0) + theme(
+    axis.title.x = element_blank(),
+    axis.title.y = element_blank(),
+    panel.border = element_blank(),
+    panel.grid = element_blank(),
+    axis.ticks = element_blank(),
+    axis.text.x = element_blank()
+  )
 
 outPlot2 + ggtitle("Pie Charts comparing Diabetes by Gender")
 ```
@@ -210,36 +239,12 @@ output$hist_plot <- renderPlot(
 )
 ```
 
-### Histogram: Play with the Scale
-
-Try adjusting the scale for the histogram. What happens to the shape of the distribution?
-
-```{r echo=FALSE}
-selectInput("hist2_scale", label = "Select type of scale",choices = c("linear", "log"), selected="linear")
-plotOutput("hist2_plot")
-```
-
-```{r context="server"}
-output$hist2_plot <- renderPlot({
-  outPlot <- bmi_diabetes_small %>% ggplot(aes(x=BMI)) + 
-    geom_histogram(bins = 15, fill="white", color="black")
-
-  if(input$hist2_scale == "log"){
-    outPlot <- outPlot + scale_x_log10(position="bottom")
-  }
-
-  outPlot <- outPlot + ggtitle(paste0("BMI scores (", input$hist2_scale, " scale)"))
-  
-  outPlot
-})
-```
-
 ### All the different ways to represent a continuous variable
 
 Try out all the different ways you can represent a continuous variable in a distribution. Which one do you like?
 
 ```{r echo=FALSE}
-selectInput("hist3_scale", label = "Select type of scale",choices = c("histogram", "density","boxplot", "violin", "dotplot"), selected="histogram")
+selectInput("hist3_scale", label = "Select type of scale",choices = c("histogram", "density","boxplot", "violin", "dotplot", "box+violin"), selected="histogram")
 plotOutput("cont1_plot")
 ```
 
@@ -270,6 +275,11 @@ bins <- 30
     outPlot <- outPlot + geom_dotplot(bins=bins, size=1)
   }
 
+  if(input$hist3_scale == "box+violin"){
+    outPlot <- outPlot  + geom_boxplot(aes(y=BMI), width=0.5) + 
+      geom_violin(aes(y=BMI), adjust=0.5) + coord_flip()
+  }
+
   outPlot <- outPlot + xlim(c(10, 85))
   
   outPlot
@@ -283,7 +293,6 @@ Let's look at our other continuous covariate, `Age`. Does the dotplot show anyth
 ```{r}
 bmi_diabetes_small %>% ggplot(aes(x=Age)) + geom_dotplot(size=1) + xlim(c(21, 90)) 
 ```
-
 
 ## Relationships: 2 categorical variables
 
