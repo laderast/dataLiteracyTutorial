@@ -7,6 +7,8 @@ The goal of `dataLiteracyTutorial` is to provide a basic tutorial showing how to
 
 `dataLiteracyTutorial` is implemented as a [LearnR package](https://rstudio.github.io/learnr/). It can be set up on a Shiny server such as shinyapps.io or can be installed and run on a computer with the instructions below.
 
+View the actual tutorial here: <https://tladeras.shinyapps.io/dataLiteracy/>
+
 Installation
 ------------
 
