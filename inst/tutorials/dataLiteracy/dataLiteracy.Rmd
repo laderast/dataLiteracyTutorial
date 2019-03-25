@@ -381,6 +381,8 @@ A [boxplot](https://en.wikipedia.org/wiki/Box_plot) allows you to visually compa
 - Sample maximum (the largest value)
 - Outliers (very large or small values) are represented as dots.
 
+![Boxplot Diagram](images/boxplot.png)
+
 ```{r boxplot, fig.height=7, fig.width=7, out.width=500, echo=FALSE, eval=FALSE}
 five_number_summary <- iris %>%
   group_by(1) %>%
@@ -473,7 +475,7 @@ NHANES %>% ggplot(aes(x=Weight,y=BMI)) + geom_point() + stat_smooth(method="lm",
 
 Now you can try to get a feel for what correlation (linear and non-linear) looks like. Try a few pairs, such as (`BMI` and `Total Cholesterol`), (`BMI` and `Testosterone`), and (`Height`, `Income`).  Before you look at the data, make a guess whether there is a relationship between variables.
 
-Do you see a relationship between these two variables? How strong is the relationship.
+Do you see a relationship between these two variables? How strong is the relationship?
 
 ```{r}
 cont_vars = c("Age","Weight","Height","BMI","Total Cholesterol"= "TotChol","Income"= "HHIncomeMid","Testosterone")
@@ -524,26 +526,47 @@ Many types of clinical data can be represented as time series:
 - Patient Visits
 - Nursing Shifts
 
-[Line charts](https://en.wikipedia.org/wiki/Line_chart) are the most common way to visualize [time series](https://en.wikipedia.org/wiki/Time_series) data, with time **usually** as the horizontal X axis and range of a quantitative variable as the vertical Y axis:
-![](images/tsplot-1.png)
+[Line charts](https://en.wikipedia.org/wiki/Line_chart) are the most common way to visualize [time series](https://en.wikipedia.org/wiki/Time_series) data, with time **usually** as the horizontal X axis and range of a quantitative variable as the vertical Y axis.
 
-[Example modified from wmf-allhands18](https://bearloga.github.io/wmf-allhands18/)
+The data below are the counts major categories of crimes by month/year from Portland Police.
+
+```{r}
+data("crime_data_stat", package="dataLiteracyTutorial")
+plot <- crime_data_stat %>% ggplot(aes(x=crime_yearmonth, y=count, color=offense_category)) + geom_line()
+
+plotly::ggplotly(plot)
+```
+
+This is another plot called a *stacked-area* plot. 
+
+```{r}
+plot <- crime_data_stat %>% ggplot(aes(x=crime_yearmonth, y=count, fill=offense_category)) + geom_area()
+
+plotly::ggplotly(plot)
+```
+
+
+What is the largest category of crime?
+
+Are the total number of crimes continually increasing over time?
 
 ## Spatial Data
 
 Spatial data is rapidly becoming very important, as it allows us to summarize spatial differences.
 
-Below is an interactive map of Portland and Biketown Rentals.
+Below is an interactive map of Portland and Biketown Rentals. The map can toggle between the points themselves and a *chloropleth*, which summarizes the data by the number of points within a smaller area of the map, in this case, by neighborhood.
+
+Which is easier to summarize by neighborhood? What neighborhood has the largest number of bike rentals?
 
 ```{r}
 library(sf)
 library(leaflet)
 #library(here)
 data("port_bike",package = "dataLiteracyTutorial")
+data("bike_points", package="dataLiteracyTutorial")
+biketown2 <- biketown2[sample(nrow(biketown2), 1000),]
 
-#load(here("data", "port_bike.rda"))
-
-bins <- c(1, 200, 600, 1000, 2000, 5000, Inf)
+bins <- c(1, 200, 600, 1000, 2000, 5000, 10000, Inf)
 pal <- colorBin("YlOrRd", domain = port_bike$num_rentals, bins = bins)
 
 labels <- sprintf(
@@ -552,12 +575,19 @@ labels <- sprintf(
 ) %>% lapply(htmltools::HTML)
 
 
-port_bike %>% leaflet() %>% 
+leaflet() %>% 
   addPolygons(fillColor = ~pal(num_rentals), weight = 2,
-  opacity = 1,
-  color = "white",
+   opacity = 1, group = "neighborhoods",
+   color = "white",
   dashArray = "3", label = labels,
-  fillOpacity = 0.5) %>% addTiles()
+  fillOpacity = 0.5, data=port_bike) %>% 
+  addMarkers(data = biketown2, group="points") %>%
+  addLayersControl(
+           baseGroups = c("points", "neighborhoods"),
+           options = layersControlOptions(collapsed = FALSE)
+         ) %>% addTiles()
+
+
 
 
 ```

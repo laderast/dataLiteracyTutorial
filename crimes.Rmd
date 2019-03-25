@@ -1,0 +1,45 @@
+---
+title: "crimes"
+author: "Ted Laderas"
+date: "March 25, 2019"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(here)
+library(dplyr)
+library(readr)
+library(lubridate)
+library(ggplot2)
+library(tsibble)
+
+crime_data <- read_csv(here::here("data", "Open_Data_Sheet_data_crime.csv"))
+
+big_categories <- c("Assault Offenses", "Burglary","Larceny Offenses",
+                    "Motor Vehicle Theft", "Sex Offenses", "Vandalism")
+
+
+crime_data_stat <- crime_data %>% 
+  mutate(date = mdy(`Occur Date`), 
+         crime_yearmonth = yearmonth(date), 
+         crime_year=year(date), 
+         offense_category = factor(`Offense Category`)) %>%
+  filter(offense_category %in% big_categories) %>%
+  filter(crime_year > 2015) %>%
+  group_by(offense_category, crime_yearmonth) %>%
+  summarize(count = n())  %>% as_tsibble(key = id(offense_category),index=crime_yearmonth) %>% tsibble::fill_gaps(count=0)
+
+
+save(crime_data_stat, file="data/crime_data_stat.rda")
+
+plot <- crime_data_stat %>% ggplot(aes(x=crime_yearmonth, y=count, fill=offense_category)) + geom_area()
+
+plotly::ggplotly(plot)
+
+plot <- crime_data_stat %>% ggplot(aes(x=crime_yearmonth, y=count, color=offense_category)) + geom_line()
+
+plotly::ggplotly(plot)
+
+```
+
