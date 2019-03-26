@@ -713,7 +713,6 @@ question("What happens to the proportion of dead people who smoke as we filter o
 ```
 
 
-
 ### Distributions of annual income
 
 Take a look at the distributions of annual income graph here and compare 1960 to 2016.
