@@ -534,8 +534,6 @@ Many types of clinical data can be represented as time series:
 
 We might be interested in questions of volume (is the number of visits to the emergency room increasing over time?), or whether a treatment for a patient shows improvement or not (does taking Blood Pressure Medicine improve our blood pressure after two weeks?).
 
-[Line charts](https://en.wikipedia.org/wiki/Line_chart) are the most common way to visualize [time series](https://en.wikipedia.org/wiki/Time_series) data, with time **usually** as the horizontal X axis and range of a quantitative variable as the vertical Y axis.
-
 The data below are the counts of major categories of crimes by month/year from Portland Police. Before we visualize the data, here are the first few rows of the dataset:
 
 ```{r}
@@ -543,6 +541,10 @@ data("crime_data_stat", package="dataLiteracyTutorial")
 
 head(crime_data_stat)
 ```
+
+[Line charts](https://en.wikipedia.org/wiki/Line_chart) are the most common way to visualize [time series](https://en.wikipedia.org/wiki/Time_series) data, with time **usually** as the horizontal X axis and range of a quantitative variable as the vertical Y axis.
+
+If the graph is too cluttered for you, try clicking on the legend to remove traces.
 
 ```{r}
 plot <- crime_data_stat %>% ggplot(aes(x=crime_yearmonth, y=count, color=offense_category)) + geom_line()
@@ -575,6 +577,15 @@ question("Are the total number of crimes continually increasing over time?",
 )
 ```
 
+Finally, we can do a proportional stacked area plot. Much like the proportional barplot, we can see whether the proportion of any one category increases or changes over time:
+
+```{r}
+plot <- crime_data_stat %>% ggplot(aes(x=crime_yearmonth, y=count, fill=offense_category)) + geom_area(position="fill")
+
+plotly::ggplotly(plot)
+```
+
+
 ## Spatial Data
 
 Spatial data is rapidly becoming very important, as it allows us to summarize spatial differences.
@@ -582,13 +593,15 @@ Spatial data is rapidly becoming very important, as it allows us to summarize sp
 Here's what the data looks like as individual points.
 
 ```{r}
-head(biketown2)
+data("biketown_small", package="dataLiteracyTutorial")
+head(biketown_small)
 ```
 
 The data can be *aggregated* by neighborhood, if we have the *spatial boundaries* of each neighborhood. We can count the number of rentals within each boundary to summarize by neighborhood:
 
 ```{r}
-head(port_bike)
+data("port_bike_small", package="dataLiteracyTutorial")
+head(port_bike_small)
 ```
 
 Below is an interactive map of Portland and Biketown Rentals. The map can toggle between the points themselves and a *chloropleth*, which summarizes the data by the number of points within a smaller area of the map, in this case, by neighborhood.
@@ -685,12 +698,12 @@ question("What do you notice about the patients above the age of 75?",
 )
 ```
 
-Let's assess what happens with number of deaths as we look at older patients.
+Let's assess what happens with number of deaths as we remove older patients from the data.
 
-Adjust the slider and see what happens to the number of deaths as we exclude the age of the highest participants.
+Adjust the slider and see what happens to the proportion of smokers for each outcome group as we remove the older patients from the dataset.
 
 ```{r}
-sliderInput("slidy", "Age Cutoff", min=min(Whickham$age)+1, max=max(Whickham$age)-1, value=c(84),step = 5)
+sliderInput("slidy", "Age Cutoff", min=min(Whickham$age)+1, max=max(Whickham$age)-1, value=c(84),step = 1)
 plotOutput("distPlot")
 ```
 
@@ -733,11 +746,9 @@ question("For healthcare practicioners, what is true about comparing income from
 
 ### Quiz Yourself: Looking at Multiple Categories
 
-[The Bechdel Test](http://bechdeltest.com) is a test to determine whether women are represented fairly in movies. 
+[The Bechdel Test](http://bechdeltest.com) is a test to determine whether women are represented fairly in movies by whether they are just talking about men, or talking about women. The following is a dataset where the proportions of each of these categories are tabulated for movies over a range of time.
 
-Look at the graph below. 
-
-![Bechdel Test and Movies](images/hickey-bechdel-11.png)
+<img src="images/hickey-bechdel-11.png" alt="Bechdel Test in Movies" width=600>
 
 ```{r bechdel}
 question("What does the black line in the middle of the graph represent?", 
@@ -770,9 +781,11 @@ question("For the chart above, were voters presidential preference in 2012 corre
 
 ### Visualization Lies
 
-https://flowingdata.com/2017/02/09/how-to-spot-visualization-lies/
+Not all visualizations are good. Some are just plain misleading.
 
-http://fivethirtyeight.com/features/you-cant-trust-what-you-read-about-nutrition/
+Take a look at the following page. What do you think is the most decieving use of visualization?
+
+https://flowingdata.com/2017/02/09/how-to-spot-visualization-lies/
 
 ## Take Home Points
 

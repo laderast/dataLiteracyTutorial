@@ -17,7 +17,7 @@ library(here)
 Here's how I processed the data.
 
 ```{r eval=FALSE}
-biketown <- readr::read_csv(here("data", "week10_biketown.csv"))
+biketown <- readr::read_csv(here("data-raw", "week10_biketown.csv"))
 biketown <- biketown[sample(nrow(biketown), 50000),]
 biketown2 <- biketown %>% tidyr::drop_na(StartLatitude, StartLongitude) %>% st_as_sf(coords = c("StartLongitude", "StartLatitude"),crs = 4326)
 
