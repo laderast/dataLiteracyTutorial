@@ -406,7 +406,7 @@ A [boxplot](https://en.wikipedia.org/wiki/Box_plot) allows you to visually compa
 - Sample maximum (the largest value)
 - Outliers (very large or small values) are represented as dots.
 
-![Boxplot Diagram](images/boxplot.png)
+<img src="images/boxplot.png" width = 500>
 
 ```{r boxplot, fig.height=7, fig.width=7, out.width=500, echo=FALSE, eval=FALSE}
 five_number_summary <- iris %>%
@@ -541,15 +541,15 @@ plot_w_cor_quotes = function(df,cont_x,cont_y) {
 
 ### Time Series
 
-Time series data is everywhere. 
-
-We are often interested in looking at overall trends, or differences in trends.
+Time series data is everywhere. We are often interested in looking at overall trends, or differences in trends.
 
 Many types of clinical data can be represented as time series:
 
 - Lab Information
 - Patient Visits
 - Nursing Shifts
+
+We might be interested in questions of volume (is the number of visits to the emergency room increasing over time?), or whether a treatment for a patient shows improvement or not (does taking Blood Pressure Medicine improve our blood pressure after two weeks?).
 
 [Line charts](https://en.wikipedia.org/wiki/Line_chart) are the most common way to visualize [time series](https://en.wikipedia.org/wiki/Time_series) data, with time **usually** as the horizontal X axis and range of a quantitative variable as the vertical Y axis.
 
