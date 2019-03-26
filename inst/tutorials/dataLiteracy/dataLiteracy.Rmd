@@ -19,6 +19,8 @@ library(NHANES)
 library(rlang)
 library(fivethirtyeight)
 library(dataLiteracyTutorial)
+library(skimr)
+library(visdat)
 data("NHANES")
 theme_set(theme_classic())
 theme_update(text=element_text(size = 13)) 
@@ -80,11 +82,11 @@ NHANES %>% ggplot(aes(x=Weight,y=BMI)) + geom_point() + stat_smooth(method="lm",
 
 ## The Data (NHANES)
 
-We're going to look at data from a study called [NHANES (National Health and Nutrition Survey)](). 
+We're going to look at data from a study called [NHANES (National Health and Nutrition Survey)](https://www.cdc.gov/nchs/nhanes/about_nhanes.htm). 
 
 ### What does the data actually look like?
 
-Here are the first 10 rows of the data table. Each row of the data corresponds to a patient. 
+Here are the first 10 rows of the data table. Each row of the data corresponds to a patient. Each column is called a *variable* (if you look at the top of the table, you can get extra information about what data type that variable is).
 
 ```{r echo=FALSE}
 bmi_diabetes[1:10,]
@@ -95,17 +97,38 @@ question("How many patients have High BMI (BMIstatus = `High`) and are Male (Gen
   answer("There are 3 patients.", correct=TRUE, message="Correct. There are 3 patients who have high BMI and are male."),
     answer("There are 4 patients.", message="Not quite. Go back and count."),
   answer("There are 5 patients.", message="Not quite. Go back and count."),
+  allow_retry = TRUE, random_answer_order = TRUE
+)
+```
+
+### Summarizing Data
+
+Oftentimes, we'll have so many rows of the data (sometimes even 1 million rows!), that it's impossible to look at it all in a table. 
+
+For this reason, we often try to generate *summaries* of the data to give us an idea of what is in the data.
+
+Let's take a look at two types of summaries of the data. The first is a visual summary of the data.
+
+Each *line* of this summary corresponds to a row in the dataset. You can see whether each row is *complete* (whether it has entries for each variable), or whether data is *missing*, which is represented as grey lines, and shows up as `NA` in the data.
+
+Understanding why the data is missing is a really important part of being a data scientist. We'll look into more missing values in our next session.
+
+```{r visdat, echo = FALSE}
+visdat::vis_dat(bmi_diabetes)
+```
+
+```{r visdat_question, echo=FALSE}
+question("How many categorical (also called factor) variables are there?",
+  answer("There are 3 categorical variables.", correct=TRUE, message="Correct. The categorical variables are Diabetes, Gender, and BMIstatus."),
+    answer("There are 2 categorical variables.", message="Not quite. Go back and count."),
+  answer("There is one categorical variable.", message="Not quite. Go back and count."),
   allow_retry = TRUE
 )
 ```
 
-### Summary Data
-
-Let's take a look at a summary of the data. 
+The second is a more tabular summary where we can get more information about the different variables.
 
 ```{r message=FALSE, warning=FALSE, echo=TRUE}
-library(tidyverse)
-
 summary(bmi_diabetes)
 ```
 
@@ -120,9 +143,9 @@ question("What can we learn from this summary table?",
 )
 ```
 
-## Categorical Data
+## Categorical (or factor) Data
 
-Categorical data has a limited number of values. Some examples include: your home state, ethnicity, what kind of phone you have (iOS/Android).
+Categorical data has a limited number of possible values. Some examples include: your *home state* (50 possible values), *country of birth*, what kind of phone you have (iOS/Android).
 
 ### Let's look at Diabetes in our patients
 
@@ -276,8 +299,10 @@ bins <- 30
   }
 
   if(input$hist3_scale == "box+violin"){
-    outPlot <- outPlot  + geom_boxplot(aes(y=BMI), width=0.5) + 
-      geom_violin(aes(y=BMI), adjust=0.5) + coord_flip()
+    outPlot <- outPlot  +   
+      geom_violin(aes(y=BMI), adjust=0.5) + 
+      geom_boxplot(aes(y=BMI), width=0.5) + 
+      coord_flip()
   }
 
   outPlot <- outPlot + xlim(c(10, 85))
@@ -528,16 +553,30 @@ Many types of clinical data can be represented as time series:
 
 [Line charts](https://en.wikipedia.org/wiki/Line_chart) are the most common way to visualize [time series](https://en.wikipedia.org/wiki/Time_series) data, with time **usually** as the horizontal X axis and range of a quantitative variable as the vertical Y axis.
 
-The data below are the counts major categories of crimes by month/year from Portland Police.
+The data below are the counts of major categories of crimes by month/year from Portland Police. Before we visualize the data, here are the first few rows of the dataset:
 
 ```{r}
 data("crime_data_stat", package="dataLiteracyTutorial")
+
+head(crime_data_stat)
+```
+
+```{r}
 plot <- crime_data_stat %>% ggplot(aes(x=crime_yearmonth, y=count, color=offense_category)) + geom_line()
 
 plotly::ggplotly(plot)
 ```
 
-This is another plot called a *stacked-area* plot. 
+```{r crime_line, echo=FALSE}
+question("What is the largest category of crime overall?",
+  answer("Larceny Offenses.", correct=TRUE, message="Correct. There appears to be around 2000 of these crimes a month"),
+    answer("Sex Offenses.", message="Not quite. Sex Offenses are the lowest"),
+  answer("Motor Vehicle Theft.", message="Not quite. These are around 500 crimes a month."),
+  allow_retry = TRUE
+)
+```
+
+This is another plot called a *stacked-area* plot. This plot shows the cumulative numbers, and can be useful in showing how the total number of something is increasing or decreasing over time.
 
 ```{r}
 plot <- crime_data_stat %>% ggplot(aes(x=crime_yearmonth, y=count, fill=offense_category)) + geom_area()
@@ -545,14 +584,29 @@ plot <- crime_data_stat %>% ggplot(aes(x=crime_yearmonth, y=count, fill=offense_
 plotly::ggplotly(plot)
 ```
 
-
-What is the largest category of crime?
-
-Are the total number of crimes continually increasing over time?
+```{r crime_area, echo=FALSE}
+question("Are the total number of crimes continually increasing over time?",
+  answer("No.", correct=TRUE, message="The total number of crimes doesn't appear to be increasing over time, holding steady around 4000 crimes per month"),
+    answer("Yes.", message="Hmmm. Can you see an overall upward trend over time?"),
+  allow_retry = TRUE
+)
+```
 
 ## Spatial Data
 
 Spatial data is rapidly becoming very important, as it allows us to summarize spatial differences.
+
+Here's what the data looks like as individual points.
+
+```{r}
+head(biketown2)
+```
+
+The data can be *aggregated* by neighborhood, if we have the *spatial boundaries* of each neighborhood. We can count the number of rentals within each boundary to summarize by neighborhood:
+
+```{r}
+head(port_bike)
+```
 
 Below is an interactive map of Portland and Biketown Rentals. The map can toggle between the points themselves and a *chloropleth*, which summarizes the data by the number of points within a smaller area of the map, in this case, by neighborhood.
 
@@ -587,11 +641,16 @@ leaflet() %>%
            options = layersControlOptions(collapsed = FALSE)
          ) %>% addTiles()
 
-
-
-
 ```
 
+```{r biketown1, echo=FALSE}
+question("What neighborhood has the largest number of bike rentals?",
+  answer("Portland Downtown.", correct=TRUE, message="There are 12452 rentals in this neighborhood."),
+    answer("Sabin Community Association.", message="Hmmm. Go back and count."),
+  answer("Northwest District Association.", message=" It has a large number of rentals, but not quite the highest."),
+  allow_retry = TRUE, random_answer_order = TRUE
+)
+```
 
 ## Quiz Yourself
 
@@ -665,7 +724,8 @@ https://github.com/laderast/dsiexplore
 - 2 categorical variables: barplots
 - 1 categorical variable, 1 continuous variable: boxplots
 - 2 continuous variables, scatterplots
-- 1 variable versus time: lineplot
+- 1 variable versus time: lineplot/stacked area plots
+- 1 variable versus location: marker map/chloropleth
 - Need to understand what the graph is trying to communicate
 - Not all charts are good.
 

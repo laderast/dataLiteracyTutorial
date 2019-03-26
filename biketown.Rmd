@@ -3,7 +3,6 @@ title: "Playing with Biketown Data"
 author: "Ted Laderas"
 date: "March 25, 2019"
 output: html_document
-runtime: shiny
 ---
 
 ```{r setup, include=FALSE}
@@ -13,23 +12,44 @@ library(sf)
 library(leaflet)
 library(here)
 
-biketown <- read_csv(here("data", "week10_biketown.csv"))
+```
+
+Here's how I processed the data.
+
+```{r eval=FALSE}
+biketown <- readr::read_csv(here("data", "week10_biketown.csv"))
 biketown <- biketown[sample(nrow(biketown), 50000),]
 biketown2 <- biketown %>% tidyr::drop_na(StartLatitude, StartLongitude) %>% st_as_sf(coords = c("StartLongitude", "StartLatitude"),crs = 4326)
 
-#inital leaflet
-biketown2 %>% st_transform(crs = 4326) %>% # leaflet crs is in 4326
-  leaflet() %>% addCircles() %>% addTiles()
 ```
 
 
 ```{r}
+data("bike_points", package="dataLiteracyTutorial")
+data("port_bike", package="dataLiteracyTutorial")
+
+biketown2 <- biketown2[sample(nrow(biketown2), 1000),]
+
+#inital leaflet
+biketown2 %>% st_transform(crs = 4326) %>% # leaflet crs is in 4326
+  leaflet() %>% addMarkers() %>% addTiles()
+```
+
+
+```{r eval=FALSE}
 portland_neighborhoods <- st_read(here("data","Neighborhoods_Regions.shp"), crs = 4326)
 
-neighborhoods_bike <- st_join( biketown2, portland_neighborhoods, join=st_within) %>% as_tibble() %>% group_by(NAME) %>% summarise(num_rentals = n(), ave_distance=mean(Distance_miles)) %>% select(neighborhood = NAME, num_rentals, ave_distance)
+neighborhoods_bike <- st_join(biketown2, 
+                              portland_neighborhoods, 
+                              join=st_within) %>% 
+  as_tibble() %>% group_by(NAME) %>% 
+  summarise(num_rentals = n(), ave_distance=mean(Distance_miles)) %>% 
+  select(neighborhood = NAME, num_rentals, ave_distance)
 
 port_bike <- portland_neighborhoods %>% dplyr::left_join(y=neighborhoods_bike, by=c("NAME"="neighborhood"))
+```
 
+```{r}
 bins <- c(1, 200, 600, 1000, 2000, 5000, Inf)
 pal <- colorBin("YlOrRd", domain = port_bike$num_rentals, bins = bins)
 
@@ -45,54 +65,7 @@ port_bike %>% leaflet() %>%
   dashArray = "3", label = labels,
   fillOpacity = 0.5) %>% addTiles()
 
-save(port_bike, file = "data/port_bike.rda")
-save(biketown2, file = "data/bike_points.rda")
+#save(port_bike, file = "data/port_bike.rda")
+#save(biketown2, file = "data/bike_points.rda")
 ```
-
-This R Markdown document is made interactive using Shiny. Unlike the more traditional workflow of creating static reports, you can now create documents that allow your readers to change the assumptions underlying your analysis and see the results immediately. 
-
-To learn more, see [Interactive Documents](http://rmarkdown.rstudio.com/authoring_shiny.html).
-
-## Inputs and Outputs
-
-You can embed Shiny inputs and outputs in your document. Outputs are automatically updated whenever inputs change.  This demonstrates how a standard R plot can be made interactive by wrapping it in the Shiny `renderPlot` function. The `selectInput` and `sliderInput` functions create the input widgets used to drive the plot.
-
-```{r eruptions, echo=FALSE}
-inputPanel(
-  selectInput("n_breaks", label = "Number of bins:",
-              choices = c(10, 20, 35, 50), selected = 20),
-  
-  sliderInput("bw_adjust", label = "Bandwidth adjustment:",
-              min = 0.2, max = 2, value = 1, step = 0.2)
-)
-
-renderPlot({
-  hist(faithful$eruptions, probability = TRUE, breaks = as.numeric(input$n_breaks),
-       xlab = "Duration (minutes)", main = "Geyser eruption duration")
-  
-  dens <- density(faithful$eruptions, adjust = input$bw_adjust)
-  lines(dens, col = "blue")
-})
-```
-
-## Embedded Application
-
-It's also possible to embed an entire Shiny application within an R Markdown document using the `shinyAppDir` function. This example embeds a Shiny application located in another directory:
-
-```{r tabsets, echo=FALSE}
-shinyAppDir(
-  system.file("examples/06_tabsets", package = "shiny"),
-  options = list(
-    width = "100%", height = 550
-  )
-)
-```
-
-Note the use of the `height` parameter to determine how much vertical space the embedded application should occupy.
-
-You can also use the `shinyApp` function to define an application inline rather then in an external directory.
-
-In all of R code chunks above the `echo = FALSE` attribute is used. This is to prevent the R code within the chunk from rendering in the document alongside the Shiny components.
-
-
 
