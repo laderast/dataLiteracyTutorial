@@ -524,7 +524,7 @@ plot_w_cor_quotes = function(df,cont_x,cont_y) {
 
 ### Time Series
 
-Time series data is everywhere. We are often interested in looking at overall trends, or differences in trends.
+Time series data is everywhere. We are often interested in looking at overall trends over time, or differences in trends over time.
 
 Many types of clinical data can be represented as time series:
 
@@ -659,15 +659,18 @@ question("According to the data, if you are a smoker, are you more likely to liv
 )
 ```
 
-The following is a plot of the outcome status versus the age of the patient in the dataset. 
+The following is a plot of the outcome status versus the age of the patient in the dataset. Remember, you can click on the legend to remove traces on the graph.
 
 ```{r}
 library(plotly)
 outcome_age <- Whickham %>% 
   group_by(age, outcome) %>% 
   summarize(count = n()) %>% 
+  tidyr::spread(key=age, value=count, fill=0) %>%
+  tidyr::gather(key=age, value=count, -outcome) %>%
+  mutate(age=as.numeric(age)) %>%
   ggplot(aes(x=age, y=count, color=outcome, fill=outcome)) +
-  geom_area() 
+  geom_line() 
 
 ggplotly(outcome_age)
 ```
