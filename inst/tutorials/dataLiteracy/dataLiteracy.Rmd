@@ -364,23 +364,6 @@ output$bar_1 <- renderPlot({
 
 ```
 
-### Quiz Yourself
-
-```{r echo=FALSE}
-bmi_diabetes_small %>% filter(!is.na(Gender)) %>% ggplot(aes(x=Gender, fill=Diabetes)) +
-  geom_bar(position="fill", color="black")
-```
-
-```{r proportions, echo=FALSE}
-question("Is there a large difference in proportions of those who have Diabetes between Men and Women in our study?",
-  answer("Yes, there is a difference", correct=TRUE, message="Yes, there's a difference"),
-  answer("No, there is no difference", message="There's a difference between the proportions, take another look."),
-  random_answer_order = TRUE,
-  allow_retry = TRUE
-)
-```
-
-
 ## Relationships: 1 categorical, 1 continuous
 
 Now we're going to investigate the relationship between one variable that is continuous and another variable that is categorical.
@@ -653,6 +636,83 @@ question("What neighborhood has the largest number of bike rentals?",
 ```
 
 ## Quiz Yourself
+
+### Smokers versus non-smokers
+
+The following dataset represents a set of patients who for which we know their `outcome` (dead/alive), their `smoker` status (yes/no), and their `Age`.
+
+Look at the plot very carefully before answering the question below:
+
+```{r}
+data("Whickham", package="dataLiteracyTutorial")
+
+Whickham %>% ggplot(aes(x=outcome, fill=smoker)) + geom_bar(color="black", position="fill")
+```
+
+```{r simpsons}
+question("According to the data, if you are a smoker, are you more likely to live or not?",
+  answer("If you smoke, you are more likely to live than be dead", correct=TRUE, message="Good job! Yes, you looked at the data"),
+  answer("If you smoke, you are more likely to be dead than live", message="Did you really look at the data? Answer the question for the data."),
+  answer("There is no association between smoking and death.", message="Did you really look at the data? Answer the question for the data."),
+  random_answer_order = TRUE,
+  allow_retry = TRUE
+)
+```
+
+The following is a plot of the outcome status versus the age of the patient in the dataset. 
+
+```{r}
+library(plotly)
+outcome_age <- Whickham %>% 
+  group_by(age, outcome) %>% 
+  summarize(count = n()) %>% 
+  ggplot(aes(x=age, y=count, color=outcome, fill=outcome)) +
+  geom_area() 
+
+ggplotly(outcome_age)
+```
+
+```{r simpsons_age}
+question("What do you notice about the patients above the age of 75?",
+  answer("There are no alive patients above 75.", correct=TRUE, message="Good job! Yes, you looked at the data"),
+  answer("There are no dead patients above 75", message="Go back and look at the counts on the graph."),
+  answer("There are equal proportions of alive/dead patients above 75.", message="Go back and look at the counts on the graph."),
+  random_answer_order = TRUE,
+  allow_retry = TRUE
+)
+```
+
+Let's assess what happens with number of deaths as we look at older patients.
+
+Adjust the slider and see what happens to the number of deaths as we exclude the age of the highest participants.
+
+```{r}
+sliderInput("slidy", "Age Cutoff", min=min(Whickham$age)+1, max=max(Whickham$age)-1, value=c(84),step = 5)
+plotOutput("distPlot")
+```
+
+```{r context="server"}
+  output$distPlot <- renderPlot(
+      exMelt() %>% ggplot(aes(x=outcome, fill=smoker)) + geom_bar(position="fill", color="black") #+
+        #facet_wrap(facets = ~AgeCat)
+      )
+    
+    exMelt <- reactive({
+      cutoff = min(input$slidy)
+      Whickham %>% filter(age < cutoff) %>% mutate(status="allPatients")
+        #mutate(AgeCat=factor(ifelse(age > cutoff, "older", NA))) 
+    })
+```
+
+```{r simpsons3, echo=FALSE}
+question("What happens to the proportion of dead people who smoke as we filter out those patients who are greater than 59 years of age?",
+  answer("The proportion of dead people who smoke is larger than the proportion of alive people who smoke", correct=TRUE, message="Correct. The large number of older people in the data actually affected our previous conclusions, because they were all dead."),
+  answer("The proportion of dead people who smoke is equal to the proportion of alive people who smoke", message="Not quite."),
+  allow_retry = TRUE
+)
+```
+
+
 
 ### Distributions of annual income
 
