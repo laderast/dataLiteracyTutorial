@@ -771,13 +771,6 @@ https://flowingdata.com/2017/02/09/how-to-spot-visualization-lies/
 
 http://fivethirtyeight.com/features/you-cant-trust-what-you-read-about-nutrition/
 
-### Acknowledgements
-
-Portions of this tutorial are partially adapted from:
-
-https://github.com/bearloga/wmf-allhands18
-https://github.com/laderast/dsiexplore
-
 ## Take Home Points
 
 - 2 categorical variables: barplots
@@ -786,7 +779,14 @@ https://github.com/laderast/dsiexplore
 - 1 variable versus time: lineplot/stacked area plots
 - 1 variable versus location: marker map/chloropleth
 - Need to understand what the graph is trying to communicate
-- Not all charts are good.
+- Not all graphs are good - people can use them to mislead
+
+### Acknowledgements
+
+Portions of this tutorial are partially adapted from:
+
+- https://github.com/bearloga/wmf-allhands18
+- https://github.com/laderast/dsiexplore
 
 ## Going beyond: Aesthetics
 
