@@ -542,7 +542,7 @@ data("crime_data_stat", package="dataLiteracyTutorial")
 head(crime_data_stat)
 ```
 
-[Line charts](https://en.wikipedia.org/wiki/Line_chart) are the most common way to visualize [time series](https://en.wikipedia.org/wiki/Time_series) data, with time **usually** as the horizontal X axis and range of a quantitative variable as the vertical Y axis.
+[Line charts](https://en.wikipedia.org/wiki/Line_chart) are the most common way to visualize [time series](https://en.wikipedia.org/wiki/Time_series) data, with time **usually** as the horizontal X axis and range of a quantitative variable as the vertical Y axis. Try mousing along a line - you will get more information about each data point.
 
 If the graph is too cluttered for you, try clicking on the legend to remove traces.
 
@@ -648,7 +648,7 @@ question("What neighborhood has the largest number of bike rentals?",
 )
 ```
 
-## Quiz Yourself
+## Example: Smoking, Death, and Age
 
 ### Smokers versus non-smokers
 
@@ -698,6 +698,8 @@ question("What do you notice about the patients above the age of 75?",
 )
 ```
 
+### Relationship between age and smoking/outcome
+
 Let's assess what happens with number of deaths as we remove older patients from the data.
 
 Adjust the slider and see what happens to the proportion of smokers for each outcome group as we remove the older patients from the dataset.
@@ -720,6 +722,7 @@ plotOutput("distPlot")
     })
 ```
 
+
 ```{r simpsons3, echo=FALSE}
 question("What happens to the proportion of dead people who smoke as we filter out those patients who are greater than 59 years of age?",
   answer("The proportion of dead people who smoke is larger than the proportion of alive people who smoke", correct=TRUE, message="Correct. The large number of older people in the data actually affected our previous conclusions, because they were all dead."),
@@ -727,6 +730,19 @@ question("What happens to the proportion of dead people who smoke as we filter o
   allow_retry = TRUE
 )
 ```
+
+
+```{r simpsons_conclusions}
+question("What do we conclude about the data? Check all that is true",
+  answer("For the entire dataset, it appears that smoking is associated with being alive.", correct=TRUE, message="Good job! Yes, you looked at the data."),
+  answer("Older patients (60+ years) in the dataset tend to be more dead than alive.", correct=TRUE),
+  answer("Younger patients smoke more than older patients", message="This may be true, but we haven't examined this association"),
+  answer("If we exclude older patients, we see what we expect: that smoking is associated with death.", correct=TRUE, message="Yes, the older patients having a larger proportion of death that the younger patients actually changed the association."),
+  allow_retry = TRUE
+)
+```
+
+## Quiz Yourself
 
 
 ### Distributions of annual income
@@ -786,6 +802,10 @@ Not all visualizations are good. Some are just plain misleading.
 Take a look at the following page. What do you think is the most decieving use of visualization?
 
 https://flowingdata.com/2017/02/09/how-to-spot-visualization-lies/
+
+### Where does the data come from?
+
+
 
 ## Take Home Points
 
