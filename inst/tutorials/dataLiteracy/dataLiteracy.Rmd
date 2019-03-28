@@ -11,7 +11,6 @@ runtime: shiny_prerendered
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = FALSE, warning=FALSE, message=FALSE)
 options(htmltools.dir.version = FALSE)
-library(here)
 library(tidyverse)
 library(learnr)
 library(cowplot)
@@ -52,8 +51,12 @@ http://www.ph.ucla.edu/epi/snow/mapsbroadstreet.html
 + Sometimes they are not desirable:
     + Experimental Artefacts
 
-![Systolic Blood Pressure Reporting](images/F1.large.jpg)
+<img src="images/F1.large.jpg" alt = "Systolic Blood Pressure Graph" width= 500>
+
+<img src="images/Sphygmomanometer.jpg" alt="Sphygmomanometer", width=500>
+
 http://care.diabetesjournals.org/content/30/8/1959
+https://commons.wikimedia.org/w/index.php?curid=7050866
 
 ### Outline
 
