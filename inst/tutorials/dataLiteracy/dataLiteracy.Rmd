@@ -29,12 +29,13 @@ data("bmi_diabetes",package = "dataLiteracyTutorial")
 
 ## Learning Objectives
 
-+ Understand how we can represent different kinds of data
-+ Understand how to communicate with visualizations
-+ Understand when visualizations are misleading
++ Explore how we can represent different kinds of data
++ Communicate with visualizations
++ Articulate when visualizations are misleading
 
-Graph literacy
-https://concord.org/wp-content/uploads/2016/12/pdf/teaching-graph-literacy-across-curriculum.pdf
+### Remember
+
+Be patient, curious, and ask questions. You can do this!
 
 ### Why Visualization?
 
@@ -52,18 +53,20 @@ http://www.ph.ucla.edu/epi/snow/mapsbroadstreet.html
 + Sometimes they are not desirable:
     + Experimental Artefacts
 
+Why are there spikes in the data here?
+
 <img src="images/F1.large.jpg" alt = "Systolic Blood Pressure Graph" width= 500>
 
-<img src="images/Sphygmomanometer.jpg" alt="Sphygmomanometer", width=500>
+<img src="images/Sphygmomanometer.jpg" alt="Sphygmomanometer"  width=500>
 
 http://care.diabetesjournals.org/content/30/8/1959
 https://commons.wikimedia.org/w/index.php?curid=7050866
 
-### Outline
+### Lots of Ways to Represent Data Visually
 
-+ Base Visualizations
-+ Aesthetics
-+ Activity
+This is an non-exhaustive list of visualizations. We won't talk about all of these, as some of them are very specialized. 
+
+This graphic is mostly to show you that there are lots of ways to visualize data, and which one you use is dependent on what parts of the data you want to emphasize.
 
 ![http://extremepresentation.typepad.com/blog/2006/09/choosing_a_good.html](images/choosing_a_good_chart.jpg)
 
@@ -118,7 +121,7 @@ Each *line* of this summary corresponds to a row in the dataset. You can see whe
 Understanding why the data is missing is a really important part of being a data scientist. We'll look into more missing values in our next session.
 
 ```{r visdat, echo = FALSE}
-visdat::vis_dat(bmi_diabetes)
+visdat::vis_dat(bmi_diabetes) + ggtitle("Visual Summary of BMI/Diabetes Data")
 ```
 
 ```{r visdat_question, echo=FALSE}
@@ -162,7 +165,7 @@ table(bmi_diabetes$Diabetes)
 Here's another way to look at the data, a bar plot. You can instantly see which of the groups is larger.
 
 ```{r echo=TRUE}
-bmi_diabetes %>% tidyr::drop_na() %>% ggplot(aes(x=Diabetes)) + geom_bar() + ggtitle("Summary of Patients: Diabetes")
+bmi_diabetes %>% tidyr::drop_na() %>% ggplot(aes(x=Diabetes)) + geom_bar() + ggtitle("Summary of Patients: Diabetes Status")
 ```
 
 Sometimes it is easier to look at a table, but usually a bar chart will make things more obvious.
@@ -174,7 +177,7 @@ We can also stack values on top of each other to make a stacked barplot. This ca
 ```{r echo=FALSE}
 bmi_diabetes %>% tidyr::drop_na() %>% ggplot(aes(x=factor(1), fill=Diabetes)) + geom_bar(width=1, position = "stack", color="black") +  theme(axis.title.x = element_blank(),
     axis.ticks = element_blank(),
-    axis.text.x = element_blank())
+    axis.text.x = element_blank()) + ggtitle("Stacked Barplot of Diabetes Status")
 ```
 
 ### Look at the scale
@@ -207,7 +210,9 @@ outPlot <- bmi_diabetes %>% tidyr::drop_na() %>% ggplot(aes(x=factor(1), fill=Di
         axis.title.y = element_blank(),
     axis.text.x = element_blank())
 
-outPlot + ggtitle("Stacked Bar Plot comparing Diabetes by Gender")
+outPlot <- outPlot + ggtitle("Stacked Bar Plot comparing Diabetes by Gender")
+
+outPlot
 
 outPlot2 <- outPlot + coord_polar("y", start=0) + theme(
     axis.title.x = element_blank(),
@@ -218,10 +223,14 @@ outPlot2 <- outPlot + coord_polar("y", start=0) + theme(
     axis.text.x = element_blank()
   )
 
-outPlot2 + ggtitle("Pie Charts comparing Diabetes by Gender")
+outPlot2 <- outPlot2 + ggtitle("Pie Charts comparing Diabetes by Gender")
+
+outPlot2
 ```
 
 ## Continuous Data
+
+Now, let's look at how continuous (numeric) data can be represented.
 
 ### Histograms
 
@@ -237,7 +246,7 @@ bmi_diabetes_small <- bmi_diabetes %>% dplyr::sample_n(size=200)
 
 bmi_diabetes_small %>% ggplot(aes(x=BMI)) + 
   geom_histogram(bins = 10, fill="white", color="black") + 
-  ggtitle("Histogram of Patients of\nNHANES with BMI Values")
+  ggtitle("Histogram of BMI Values of NHANES Patients")
 ```
 
 [Definition edited from Mikhail Popov](https://github.com/bearloga/wmf-allhands18)
@@ -262,7 +271,8 @@ bmi_diabetes_small <- bmi_diabetes %>% dplyr::sample_n(size=200)
 output$hist_plot <- renderPlot(
   bmi_diabetes_small %>% ggplot(aes(x=BMI)) + 
     geom_histogram(bins = input$hist_slider, 
-                   fill="white", color="black") + xlim(c(10, 85))
+                   fill="white", color="black") + xlim(c(10, 85)) +
+    ggtitle("Histogram of BMI")
 )
 ```
 
@@ -305,7 +315,7 @@ bins <- 30
   if(input$hist3_scale == "box+violin"){
     outPlot <- outPlot  +   
       geom_violin(aes(y=BMI), adjust=0.5) + 
-      geom_boxplot(aes(y=BMI), width=0.5) + 
+      geom_boxplot(aes(y=BMI), width=0.2) + 
       coord_flip()
   }
 
@@ -320,7 +330,7 @@ bins <- 30
 Let's look at our other continuous covariate, `Age`. Does the dotplot show anything weird to you?
 
 ```{r}
-bmi_diabetes_small %>% ggplot(aes(x=Age)) + geom_dotplot(size=1) + xlim(c(21, 90)) 
+bmi_diabetes_small %>% ggplot(aes(x=Age)) + geom_dotplot(size=1) + xlim(c(21, 90)) + ggtitle("Dotplot of Age of Patients")
 ```
 
 ## Relationships: 2 categorical variables
@@ -356,11 +366,12 @@ output$bar_1 <- renderPlot({
   outPlot <- bmi_diabetes_small %>% filter(!is.na(BMIstatus)) %>% ggplot(aes(x=BMIstatus, fill=Diabetes))
   
   if(input$bar_control1 == "regular"){
-    outPlot <- outPlot + geom_bar(position="stack", color="black")
+    outPlot <- outPlot + geom_bar(position="stack", color="black") +
+      ggtitle("Barplot of BMIstatus versus Diabetes")
   }
   
   if(input$bar_control1 == "proportional"){
-    outPlot <- outPlot + geom_bar(position="fill", color="black")
+    outPlot <- outPlot + geom_bar(position="fill", color="black") + ggtitle("Proportional Barplot of BMIstatus versus Diabetes")
   }
   
   outPlot
@@ -438,8 +449,11 @@ plotOutput("boxplot1")
 
 ```{r context="server"}
 output$boxplot1 <- renderPlot({
+  
+  type_of_plot <- paste("Boxplot of BMI by", input$boxplot1_selection)
+  
   bmi_diabetes_small %>% ggplot(aes_string(x=input$boxplot1_selection, y="BMI", fill=input$boxplot1_selection)) +
-    geom_boxplot()
+    geom_boxplot() + ggtitle(type_of_plot)
 })
 ```
 
@@ -456,20 +470,16 @@ question("Is there a difference between median BMI between those that have diabe
 Take a look at the boxplot and the violin plot side by side. What do you notice?
 
 ```{r echo=FALSE}
-plotOutput("box_v_violin")
-```
-
-```{r context="server"}
-output$box_v_violin <- renderPlot({
   boxp <- bmi_diabetes_small %>% ggplot(aes(x=Diabetes, y=BMI, fill=Diabetes)) +
-    geom_boxplot()
+    geom_boxplot() + ggtitle("Boxplot of BMI by Diabetes Status")
 
   viop <- bmi_diabetes_small %>% ggplot(aes(x=Diabetes, y=BMI, fill=Diabetes)) +
-    geom_violin()
+    geom_violin() + ggtitle("Violin plot of BMI by Diabetes Status")
 
   cowplot::plot_grid(boxp, viop)
-})
+
 ```
+
 
 ## Relationships: 2 continuous variables
 
@@ -480,7 +490,9 @@ Scatterplots show the relationship between two continuous variables. We can add 
 In this case, we are showing that knowing the values of one variable (`Weight`) means that you know something about another variable (`BMI`). Anyone know why?
 
 ```{r echo=FALSE}
-NHANES %>% ggplot(aes(x=Weight,y=BMI)) + geom_point() + stat_smooth(method="lm",se = FALSE)
+NHANES %>% ggplot(aes(x=Weight,y=BMI)) + 
+  geom_point() + stat_smooth(method="lm",se = FALSE) +
+  ggtitle("NHANES patients: BMI versus Weight")
 ```
 
 ### Look at the relationship between continuous variables
@@ -517,9 +529,14 @@ plot_w_cor_quotes = function(df,cont_x,cont_y) {
     #geom_text(data = tmpdat,aes(x=x,y=y,label=cortext),inherit.aes = FALSE,size=4)
 }
 
-  output$scatterPlotCont <- renderPlot(
-      NHANES %>% plot_w_cor_quotes(input$select_x,input$select_y)
-      )
+  output$scatterPlotCont <- renderPlot({
+    
+      output_title <- paste(input$select_x, "vs.", input$select_y)
+    
+    
+      NHANES %>% plot_w_cor_quotes(input$select_x,input$select_y) +
+        ggtitle(output_title)
+      })
 
 ```
 [Code adapted from DSIExplore by Jess Minnier](https://github.com/laderast/dsiexplore)
@@ -551,7 +568,7 @@ head(crime_data_stat)
 If the graph is too cluttered for you, try clicking on the legend to remove traces.
 
 ```{r}
-plot <- crime_data_stat %>% ggplot(aes(x=crime_yearmonth, y=count, color=offense_category)) + geom_line()
+plot <- crime_data_stat %>% ggplot(aes(x=crime_yearmonth, y=count, color=offense_category)) + geom_line() + ggtitle("Line Chart of Portland Crimes by month/year")
 
 plotly::ggplotly(plot)
 ```
@@ -568,7 +585,7 @@ question("What is the largest category of crime overall?",
 This is another plot called a *stacked-area* plot. This plot shows the cumulative numbers, and can be useful in showing how the total number of something is increasing or decreasing over time.
 
 ```{r}
-plot <- crime_data_stat %>% ggplot(aes(x=crime_yearmonth, y=count, fill=offense_category)) + geom_area()
+plot <- crime_data_stat %>% ggplot(aes(x=crime_yearmonth, y=count, fill=offense_category)) + geom_area() + ggtitle("Stacked Area Chart of\n Portland Crimes by month/year")
 
 plotly::ggplotly(plot)
 ```
@@ -581,10 +598,12 @@ question("Are the total number of crimes continually increasing over time?",
 )
 ```
 
-Finally, we can do a proportional stacked area plot. Much like the proportional barplot, we can see whether the proportion of any one category increases or changes over time:
+Finally, we can do a *proportional stacked area* plot. Much like the proportional barplot, we can see whether the proportion of any one category increases or changes over time. 
+
+Because there are multiple categories and the proportions are changing for each, it's really hard to tell overall trends for this data. 
 
 ```{r}
-plot <- crime_data_stat %>% ggplot(aes(x=crime_yearmonth, y=count, fill=offense_category)) + geom_area(position="fill")
+plot <- crime_data_stat %>% ggplot(aes(x=crime_yearmonth, y=count, fill=offense_category)) + geom_area(position="fill") + ggtitle("Proportional Stacked Area Chart\n of Portland Crimes by month/year")
 
 plotly::ggplotly(plot)
 ```
@@ -594,7 +613,7 @@ plotly::ggplotly(plot)
 
 Spatial data is rapidly becoming very important, as it allows us to summarize spatial differences.
 
-Here's what the data looks like as individual points.
+The following data is from Biketown about where people rented their bikes. Here's what the data looks like as individual points. Note the location of each point (which corresponds to a bike rental) has two variables: Latitude and Longitude. 
 
 ```{r}
 data("biketown_small", package="dataLiteracyTutorial")
@@ -636,10 +655,18 @@ leaflet() %>%
   dashArray = "3", label = labels,
   fillOpacity = 0.5, data=port_bike) %>% 
   addMarkers(data = biketown2, group="points") %>%
+  addLegend(position="bottomleft", pal=pal, 
+            group="neighborhoods", values=port_bike$num_rentals,      
+            labFormat = labelFormat( prefix = "",  
+                                     suffix = "", between = "-"),
+            title= "Num Bike Rentals",
+            opacity = 0.7) %>% 
+  addTiles()  %>% 
   addLayersControl(
            baseGroups = c("points", "neighborhoods"),
            options = layersControlOptions(collapsed = FALSE)
-         ) %>% addTiles()
+         )
+
 
 ```
 
@@ -652,6 +679,11 @@ question("What neighborhood has the largest number of bike rentals?",
 )
 ```
 
+Spatial data becomes extremely powerful when they are combined with other information. What if we asked questions about Asthma Incidence and Overall Levels of pollution?
+
+In this example, location is clearly one *Social Determinant of Health*, and using spatial analysis to highlight inequities in populations is very exciting and may allow us to better address these heatlh inequities.
+
+
 ## Example: Smoking, Death, and Age
 
 ### Smokers versus non-smokers
@@ -663,8 +695,8 @@ Look at the plot very carefully before answering the question below:
 ```{r}
 data("Whickham", package="dataLiteracyTutorial")
 
-Whickham %>% ggplot(aes(x=outcome, fill=smoker)) + geom_bar(color="black", position="fill")
-```
+Whickham %>% ggplot(aes(x=outcome, fill=smoker)) + geom_bar(color="black", position="fill") + ggtitle("Proportional Barplot of\nSmoking Status versus Outcome")
+``` 
 
 ```{r simpsons}
 question("According to the data, if you are a smoker, are you more likely to live or not?",
@@ -687,7 +719,7 @@ outcome_age <- Whickham %>%
   tidyr::gather(key=age, value=count, -outcome) %>%
   mutate(age=as.numeric(age)) %>%
   ggplot(aes(x=age, y=count, color=outcome, fill=outcome)) +
-  geom_line() 
+  geom_line() + ggtitle("Outcome versus Patient Age")
 
 ggplotly(outcome_age)
 ```
@@ -715,8 +747,7 @@ plotOutput("distPlot")
 
 ```{r context="server"}
   output$distPlot <- renderPlot(
-      exMelt() %>% ggplot(aes(x=outcome, fill=smoker)) + geom_bar(position="fill", color="black") #+
-        #facet_wrap(facets = ~AgeCat)
+      exMelt() %>% ggplot(aes(x=outcome, fill=smoker)) + geom_bar(position="fill", color="black") +ggtitle("The Effect of Age Cutoff on Smoking/Outcome")
       )
     
     exMelt <- reactive({
@@ -766,7 +797,11 @@ question("For healthcare practicioners, what is true about comparing income from
 
 ### Quiz Yourself: Looking at Multiple Categories
 
-[The Bechdel Test](http://bechdeltest.com) is a test to determine whether women are represented fairly in movies by whether they are just talking about men, or talking about women. The following is a dataset where the proportions of each of these categories are tabulated for movies over a range of time.
+[The Bechdel Test](http://bechdeltest.com) is a test to determine whether women are represented fairly in movies. 
+
+> The Bechdel Test, sometimes called the Mo Movie Measure or Bechdel Rule is a simple test which names the following three criteria: (1) it has to have at least two women in it, who (2) who talk to each other, about (3) something besides a man.
+
+The following is a dataset where the proportions of each of these categories are tabulated for movies over a range of time.
 
 <img src="images/hickey-bechdel-11.png" alt="Bechdel Test in Movies" width=600>
 
@@ -873,4 +908,6 @@ Whickham %>% sample_n(size=50) %>% arrange(age) %>% mutate(row_num=1:nrow(.)) %>
 
 ```
 
+Graph literacy
+https://concord.org/wp-content/uploads/2016/12/pdf/teaching-graph-literacy-across-curriculum.pdf
 
