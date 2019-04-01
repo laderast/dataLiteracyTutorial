@@ -1,0 +1,12 @@
+name: dataLiteracyTutorial
+title: dataLiteracyTutorial
+username:
+account: tladeras
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 830453
+bundleId: 1979801
+url: https://tladeras.shinyapps.io/dataLiteracyTutorial/
+when: 1554150808.06956
+asMultiple: FALSE
+asStatic: FALSE

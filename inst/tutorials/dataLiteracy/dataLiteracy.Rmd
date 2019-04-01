@@ -45,7 +45,8 @@ Visualization is good for exploring data because we are really good at evaluatin
 + Sometimes these patterns are desirable:
     + Associations
 
-![Broad Street Pump Map](images/broadblock_original.jpg)
+<img src="images/Snow-cholera-map-1.jpg" width=600>
+
 http://www.ph.ucla.edu/epi/snow/mapsbroadstreet.html
 
 ### Undesirable Variation
@@ -56,10 +57,15 @@ http://www.ph.ucla.edu/epi/snow/mapsbroadstreet.html
 Why are there spikes in the data here?
 
 <img src="images/F1.large.jpg" alt = "Systolic Blood Pressure Graph" width= 500>
+http://care.diabetesjournals.org/content/30/8/1959
+
+
+### How we measure blood pressure
+
+Any thoughts after looking at this?
 
 <img src="images/Sphygmomanometer.jpg" alt="Sphygmomanometer"  width=500>
 
-http://care.diabetesjournals.org/content/30/8/1959
 https://commons.wikimedia.org/w/index.php?curid=7050866
 
 ### Lots of Ways to Represent Data Visually
@@ -683,6 +689,8 @@ Spatial data becomes extremely powerful when they are combined with other inform
 
 In this example, location is clearly one *Social Determinant of Health*, and using spatial analysis to highlight inequities in populations is very exciting and may allow us to better address these heatlh inequities.
 
+<img src="images/sdh.jpg" alt="Social Determinants of Health" width=600>
+From https://upload.wikimedia.org/wikipedia/commons/thumb/1/16/Social_Determinants_of_Health_Infoviz.jpg/1068px-Social_Determinants_of_Health_Infoviz.jpg
 
 ## Example: Smoking, Death, and Age
 
@@ -699,7 +707,7 @@ Whickham %>% ggplot(aes(x=outcome, fill=smoker)) + geom_bar(color="black", posit
 ``` 
 
 ```{r simpsons}
-question("According to the data, if you are a smoker, are you more likely to live or not?",
+question("According to the data, if you are a smoker, are you more likely to live or not? Look at the proportion of smokers within alive and dead",
   answer("If you smoke, you are more likely to live than be dead", correct=TRUE, message="Good job! Yes, you looked at the data"),
   answer("If you smoke, you are more likely to be dead than live", message="Did you really look at the data? Answer the question for the data."),
   answer("There is no association between smoking and death.", message="Did you really look at the data? Answer the question for the data."),
