@@ -3,7 +3,7 @@ title: "Data Literacy: Understanding Visualizations"
 author: "Ted Laderas"
 date: "`r Sys.Date()`"
 output: learnr::tutorial
-#output: html_document
+#output: pdf_document
 runtime: shiny_prerendered
 #runtime: shiny
 ---
@@ -95,7 +95,9 @@ NHANES %>% ggplot(aes(x=Weight,y=BMI)) + geom_point() + stat_smooth(method="lm",
 
 ## The Data (NHANES)
 
-We're going to look at data from a study called [NHANES (National Health and Nutrition Survey)](https://www.cdc.gov/nchs/nhanes/about_nhanes.htm). 
+We're going to look at data from a study called [NHANES (National Health and Nutrition Examination Survey)](https://www.cdc.gov/nchs/nhanes/about_nhanes.htm). 
+
+This survey is meant to represent the United States (via a complicated sampling design) in terms of nutritional habits, physical activity, drug use, and outcomes (depression, diabetes, and physical activity).
 
 ### What does the data actually look like?
 
@@ -840,18 +842,13 @@ question("For the chart above, were voters presidential preference in 2012 corre
                 message="Take a look at the line. Is it on the diagonal?"))
 ```
 
-## For More Info
-
-### Visualization Lies
+## Misleading Visualizations: Visualization Lies
 
 Not all visualizations are good. Some are just plain misleading.
 
 Take a look at the following page. What do you think is the most decieving use of visualization?
 
 https://flowingdata.com/2017/02/09/how-to-spot-visualization-lies/
-
-### Where does the data come from?
-
 
 
 ## Take Home Points
