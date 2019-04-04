@@ -21,7 +21,7 @@ Imports:
     visdat,
     NHANES,
     rlang,
-    fs,
+    sf,
     leaflet
 URL: https://github.com/laderast/dataLiteracy
 BugReports: https://github.com/laderast/dataLiteracy/issues
