@@ -1,0 +1,14 @@
+install.packages("learnr")
+install.packages(c("ggplot2",
+    "dplyr",
+    "shiny",
+    "here",
+    "cowplot",
+    "fivethirtyeight",
+    "plotly",
+    "skimr",
+    "visdat",
+    "NHANES",
+    "rlang",
+    "sf",
+    "leaflet"))
