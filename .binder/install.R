@@ -1,11 +1,11 @@
 install.packages("learnr")
-install.packages(c("ggplot2",
-    "dplyr",
-    "shiny",
-    "here",
-    "cowplot",
-    "fivethirtyeight",
-    "plotly",
+install.packages("ggplot2")
+install.packages("dplyr")
+install.packages("shiny")
+install.packages("here")
+install.packages("cowplot")
+install.packages("fivethirtyeight")
+install.packages(c( "plotly",
     "skimr",
     "visdat",
     "NHANES",
