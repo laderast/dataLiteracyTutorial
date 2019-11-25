@@ -14,7 +14,7 @@ RUN install2.r --error \
     skimr \
     visdat \
     NHANES \
-    rlang \
+    rlang 
 
 COPY . ${HOME}
 COPY ./inst/tutorials/dataLiteracy ${HOME}/dataLiteracy
