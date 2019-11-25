@@ -25,6 +25,11 @@ You can then run the tutorial with
 learnr::run_tutorial("dataLiteracy", package = "dataLiteracyTutorial")
 ```
 
+Binder
+------
+
+https://mybinder.org/v2/gh/laderast/dataLiteracyTutorial/master?urlpath=shiny/dataLiteracyTutorial/
+
 Acknowledgements
 ----------------
 
