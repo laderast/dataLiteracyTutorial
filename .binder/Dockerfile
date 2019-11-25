@@ -21,7 +21,7 @@ RUN install2.r --error \
     
 USER root   
 COPY . ${HOME}
-COPY inst/tutorials/dataLiteracy ${HOME}
+COPY inst/tutorials/dataLiteracy/ ${HOME}/dataLiteracy/
 
 RUN chown -R ${NB_USER} ${HOME}
 
