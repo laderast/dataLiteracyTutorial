@@ -1,5 +1,8 @@
 FROM rocker/geospatial:latest
 
+ARG NB_USER
+ARG NB_UID
+
 RUN install2.r --error \
     --deps TRUE \
     rlang \
@@ -18,7 +21,7 @@ RUN install2.r --error \
     
 USER root   
 COPY . ${HOME}
-COPY ./inst/tutorials/dataLiteracy ${HOME}/dataLiteracy
+COPY inst/tutorials/dataLiteracy ${HOME}
 
 RUN chown -R ${NB_USER} ${HOME}
 
