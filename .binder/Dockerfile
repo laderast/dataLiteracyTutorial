@@ -5,17 +5,20 @@ USER root
 
 RUN install2.r --error \
     --deps TRUE \
-    learnr \
+    rlang \
     shiny \
+    learnr
+
+RUN install2.r --error \
+    --deps TRUE \
     here \
     cowplot \
     fivethirtyeight \
     plotly \
     skimr \
     visdat \
-    NHANES \
-    rlang 
-
+    NHANES 
+    
 COPY . ${HOME}
 COPY ./inst/tutorials/dataLiteracy ${HOME}/dataLiteracy
 
