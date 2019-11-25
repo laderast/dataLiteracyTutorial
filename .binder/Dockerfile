@@ -7,10 +7,7 @@ RUN install2.r --error \
     --deps TRUE \
     rlang \
     shiny \
-    learnr
-
-RUN install2.r --error \
-    --deps TRUE \
+    learnr \
     here \
     cowplot \
     fivethirtyeight \
