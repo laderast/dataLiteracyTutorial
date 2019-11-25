@@ -28,7 +28,7 @@ learnr::run_tutorial("dataLiteracy", package = "dataLiteracyTutorial")
 Binder
 ------
 
-https://mybinder.org/v2/gh/laderast/dataLiteracyTutorial/master?urlpath=shiny/dataLiteracyTutorial/
+https://mybinder.org/v2/gh/laderast/dataLiteracyTutorial/master?urlpath=shiny/dataLiteracy/
 
 Acknowledgements
 ----------------
