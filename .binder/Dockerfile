@@ -1,8 +1,5 @@
 FROM rocker/geospatial:latest
 
-USER root
-# Copy your repository contents to the image
-
 RUN install2.r --error \
     --deps TRUE \
     rlang \
@@ -19,6 +16,7 @@ RUN install2.r --error \
     visdat \
     NHANES 
     
+USER root   
 COPY . ${HOME}
 COPY ./inst/tutorials/dataLiteracy ${HOME}/dataLiteracy
 
