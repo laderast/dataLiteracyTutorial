@@ -1,6 +1,4 @@
 install.packages("learnr")
-install.packages("ggplot2")
-install.packages("dplyr")
 install.packages("shiny")
 install.packages("here")
 install.packages("cowplot")
