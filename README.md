@@ -28,7 +28,16 @@ learnr::run_tutorial("dataLiteracy", package = "dataLiteracyTutorial")
 Binder
 ------
 
-https://mybinder.org/v2/gh/laderast/dataLiteracyTutorial/master?urlpath=shiny/dataLiteracy/
+To run the tutorial in a binder version of rstudio, click the following below:
+
+https://mybinder.org/v2/gh/laderast/dataLiteracyTutorial/master?urlpath=rstudio
+
+Then run
+
+```r
+learnr::run_tutorial("dataLiteracy", package = "dataLiteracyTutorial")
+```
+in the console. Make sure you allow the popup to see the tutorial!
 
 Acknowledgements
 ----------------
