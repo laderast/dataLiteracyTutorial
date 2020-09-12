@@ -30,14 +30,9 @@ Binder
 
 To run the tutorial in a binder version of rstudio, click the following below:
 
-https://mybinder.org/v2/gh/laderast/dataLiteracyTutorial/master?urlpath=rstudio
+https://mybinder.org/v2/gh/laderast/dataLiteracyTutorial/master?urlpath=shiny/dataLiteracy/
 
-Then run
-
-```r
-learnr::run_tutorial("dataLiteracy", package = "dataLiteracyTutorial")
-```
-in the console. Make sure you allow the popup to see the tutorial!
+Make sure you allow the popup to see the tutorial!
 
 Acknowledgements
 ----------------
