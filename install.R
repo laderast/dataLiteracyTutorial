@@ -10,5 +10,3 @@ install.packages(c( "plotly",
     "rlang",
     "sf",
     "leaflet"))
-install.packages("remotes")
-remotes::install_github("laderast/dataLiteracyTutorial")
